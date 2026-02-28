@@ -1,0 +1,3 @@
+nVehicles,nRsu,simTime,intervalMs,payloadSize,cryptoDelayUsTx,cryptoDelayUsRx,maliciousRate,enableReplayAttack,replayEveryMs,blockIntervalMs,mineDelayMs,txData,rxData,replayDrops,sigDrops,pdr,avgDelay_s,throughput_bps,reportsSent,reportsRxAtRsu,blocks,reportsCommitted,avgBlockLatency_s,avgLedgerTrust,file
+10,2,20,100,64,200,200,0.2,1,300,1000,50,250,1691,521,492,6.764,0.000845365,60199.6,190,133,19,126,0.05,0.805,bc_metrics_m0.2.csv
+10,2,20,100,64,200,200,0.4,1,300,1000,50,250,1271,396,1037,5.084,0.000865554,45247.6,190,133,19,126,0.05,0.63,bc_metrics_m0.4.csv

@@ -1,0 +1,2 @@
+nVehicles,nRsu,simTime,intervalMs,payloadSize,cryptoDelayUsTx,cryptoDelayUsRx,maliciousRate,enableReplayAttack,replayEveryMs,blockIntervalMs,mineDelayMs,txData,rxData,replayDrops,sigDrops,pdr,avgDelay_s,throughput_bps,reportsSent,reportsRxAtRsu,blocks,reportsCommitted,avgBlockLatency_s,avgLedgerTrust
+20,3,30,100,64,200,200,0.3,1,300,1000,50,384,4515,1423,2420,11.7578,0.000805097,107156,580,230,29,230,0.05,0.678
