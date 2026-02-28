@@ -52,19 +52,20 @@ private:
 struct MsgHdr
 {
   uint64_t nonce;
-  double   txTime;     // seconds
+  double   txTime;    // seconds
   uint32_t senderId;
-  uint8_t  isReplay;   // 0/1 (optional)
+  uint8_t  isReplay;  // 0/1 (debug only)
 };
 #pragma pack(pop)
 
-// ---------------- Globals / Params ----------------
+// ---------------- Global metrics ----------------
 static uint64_t g_txCount = 0;
 static uint64_t g_rxCount = 0;
 static uint64_t g_replayDrops = 0;
 static double   g_delaySum = 0.0;
 static uint64_t g_rxBytes = 0;
 
+// ---------------- Params ----------------
 static uint32_t g_nVehicles = 10;
 static double   g_simTime = 20.0;
 static uint32_t g_payloadSize = 64;
@@ -85,6 +86,10 @@ static bool g_hasLast = false;
 // ---------------- Helpers ----------------
 static void ProcessReceived(uint32_t receiverId, MsgHdr hdr, uint32_t pktSize)
 {
+  // Ignore self-receive (common in broadcast + bound sockets)
+  if (receiverId == hdr.senderId)
+    return;
+
   ReplayCache* cache = g_caches.at(receiverId).get();
   if (cache->Seen(hdr.nonce))
   {
@@ -116,15 +121,14 @@ static void RxSocketReady(Ptr<Socket> socket)
     if (packet->GetSize() < sizeof(MsgHdr))
       continue;
 
-    // Read only header bytes
-    MsgHdr hdr{};
-    std::vector<uint8_t> buf(sizeof(MsgHdr));
+    std::vector<uint8_t> buf(packet->GetSize());
     packet->CopyData(buf.data(), buf.size());
+
+    MsgHdr hdr{};
     std::memcpy(&hdr, buf.data(), sizeof(MsgHdr));
 
-    // Simulate RX crypto/verify delay
-    Simulator::Schedule(MicroSeconds(g_cryptoDelayUsRx), &ProcessReceived,
-                        receiverId, hdr, static_cast<uint32_t>(packet->GetSize()));
+    Simulator::Schedule(MicroSeconds(g_cryptoDelayUsRx),
+                        &ProcessReceived, receiverId, hdr, packet->GetSize());
   }
 }
 
@@ -150,14 +154,10 @@ static void SendNewPacket(Ptr<Socket> sock, uint32_t senderId)
   for (uint32_t i = 0; i < g_payloadSize; i++)
     wire[sizeof(MsgHdr) + i] = static_cast<uint8_t>(i & 0xFF);
 
-  // Save last wire for replay attack
   g_lastWire = wire;
   g_hasLast = true;
 
-  // Simulate TX crypto/sign delay then send
   Simulator::Schedule(MicroSeconds(g_cryptoDelayUsTx), &DoSendRaw, sock, wire);
-
-  // Next send
   Simulator::Schedule(MilliSeconds(g_intervalMs), &SendNewPacket, sock, senderId);
 }
 
@@ -180,12 +180,16 @@ static void ReplayAttackTick(Ptr<Socket> sock)
 
 static void WriteCsv()
 {
-  double pdr = (g_txCount > 0) ? (double)g_rxCount / (double)g_txCount : 0.0;
+  // Broadcast expected receptions: each tx should be received by (nVehicles-1) nodes
+  double expectedRx = (g_nVehicles > 1) ? (double)g_txCount * (double)(g_nVehicles - 1) : 0.0;
+  double pdr = (expectedRx > 0) ? (double)g_rxCount / expectedRx : 0.0;
+
   double avgDelay = (g_rxCount > 0) ? g_delaySum / (double)g_rxCount : 0.0;
   double throughputBps = (g_simTime > 0) ? (double)g_rxBytes * 8.0 / g_simTime : 0.0;
 
   std::ofstream f(g_csvOut, std::ios::out | std::ios::trunc);
-  f << "nVehicles,simTime,intervalMs,payloadSize,cryptoDelayUsTx,cryptoDelayUsRx,enableReplayAttack,replayEveryMs,txCount,rxCount,replayDrops,pdr,avgDelay_s,throughput_bps\n";
+  f << "nVehicles,simTime,intervalMs,payloadSize,cryptoDelayUsTx,cryptoDelayUsRx,"
+       "enableReplayAttack,replayEveryMs,txCount,rxCount,replayDrops,pdr,avgDelay_s,throughput_bps\n";
   f << g_nVehicles << "," << g_simTime << "," << g_intervalMs << "," << g_payloadSize << ","
     << g_cryptoDelayUsTx << "," << g_cryptoDelayUsRx << ","
     << (g_enableReplayAttack ? 1 : 0) << "," << g_replayEveryMs << ","
@@ -220,7 +224,7 @@ int main(int argc, char *argv[])
   NodeContainer vehicles;
   vehicles.Create(g_nVehicles);
 
-  // Keep nodes close so RX != 0
+  // Keep nodes close so RX is not zero
   MobilityHelper mobility;
   mobility.SetPositionAllocator("ns3::RandomRectanglePositionAllocator",
                                 "X", StringValue("ns3::UniformRandomVariable[Min=0.0|Max=50.0]"),
@@ -231,18 +235,14 @@ int main(int argc, char *argv[])
                             "Distance", DoubleValue(5.0));
   mobility.Install(vehicles);
 
-  // WiFi ad-hoc
   WifiHelper wifi;
   wifi.SetStandard(WIFI_STANDARD_80211a);
-  wifi.SetRemoteStationManager("ns3::ConstantRateWifiManager",
-                               "DataMode", StringValue("OfdmRate6Mbps"),
-                               "ControlMode", StringValue("OfdmRate6Mbps"));
 
   YansWifiChannelHelper channel = YansWifiChannelHelper::Default();
   YansWifiPhyHelper phy;
   phy.SetChannel(channel.Create());
-  phy.Set("TxPowerStart", DoubleValue(20.0));
-  phy.Set("TxPowerEnd", DoubleValue(20.0));
+  phy.Set("TxPowerStart", DoubleValue(16.0));
+  phy.Set("TxPowerEnd", DoubleValue(16.0));
 
   WifiMacHelper mac;
   mac.SetType("ns3::AdhocWifiMac");
@@ -256,7 +256,7 @@ int main(int argc, char *argv[])
   ipv4.SetBase("10.1.0.0", "255.255.0.0");
   ipv4.Assign(devices);
 
-  // Replay caches
+  // Build replay caches
   g_caches.clear();
   g_caches.resize(g_nVehicles);
   for (uint32_t i = 0; i < g_nVehicles; i++)
@@ -272,7 +272,7 @@ int main(int argc, char *argv[])
     recvSocket->SetRecvCallback(MakeCallback(&RxSocketReady));
   }
 
-  // Sender socket (broadcast on /16)
+  // Sender socket on node 0 (broadcast for /16)
   Ptr<Socket> sendSocket = Socket::CreateSocket(vehicles.Get(0), UdpSocketFactory::GetTypeId());
   sendSocket->SetAllowBroadcast(true);
   sendSocket->Connect(InetSocketAddress(Ipv4Address("10.1.255.255"), port));
