@@ -1,0 +1,2 @@
+nVehicles,simTime,intervalMs,payloadSize,cryptoDelayUsTx,cryptoDelayUsRx,enableReplayAttack,replayEveryMs,txCount,rxCount,replayDrops,pdr,avgDelay_s,throughput_bps
+10,20,100,64,200,200,1,300,250,1710,540,6.84,0.000762149,58140

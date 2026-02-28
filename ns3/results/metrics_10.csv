@@ -1,0 +1,2 @@
+nVehicles,simTime,txCount,rxCount,pdr,avgDelay_s,throughput_bps
+10,20,190,0,0,0,0

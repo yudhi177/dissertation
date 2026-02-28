@@ -1,0 +1,3 @@
+time_s,from_rsu,to_rsu,trust,mode,delay_s
+34.405,0,1,0.858,FAST,0.005
+65.705,1,2,0.825,FAST,0.005
