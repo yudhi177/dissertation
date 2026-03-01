@@ -1,0 +1,21 @@
+# ===== NS-3 build junk (do not commit) =====
+ns3/build/
+ns3/cmake-cache/
+ns3/.lock-ns3*
+ns3/.waf-*
+ns3/waf*
+ns3/CMakeCache.txt
+ns3/CMakeFiles/
+ns3/**/CMakeFiles/
+ns3/**/cmake-cache/
+
+# ===== Large raw logs/events (optional) =====
+ns3/results/**/events*.csv
+ns3/results/**/*.pcap
+ns3/results/**/*.tr
+ns3/results/**/*.dat
+
+# ===== OS/editor =====
+.DS_Store
+*.swp
+*~
