@@ -505,9 +505,21 @@ static void CheckHandovers(Ptr<Node> vehNode)
 }
 
 /* ===================== CSV METRICS ===================== */
+/* ===================== CSV METRICS ===================== */
 static void WriteCsv()
 {
-  double pdr = (g_txData > 0) ? double(g_rxData) / double(g_txData) : 0.0;
+  // Raw PDR (may exceed 1.0 in broadcast scenarios)
+  double pdr_raw = (g_txData > 0) ? double(g_rxData) / double(g_txData) : 0.0;
+
+  // Normalized PDR: expected receptions per broadcast = (nVehicles - 1)
+  // NOTE: We normalize to vehicle receivers only (not RSUs), because data sender is vehicle0 broadcasting.
+  double expectedRx = (g_txData > 0 && g_nVehicles > 1) ? (double(g_txData) * double(g_nVehicles - 1)) : 0.0;
+  double pdr_norm = (expectedRx > 0.0) ? (double(g_rxData) / expectedRx) : 0.0;
+
+  // clamp just in case of any counting anomalies
+  if (pdr_norm < 0.0) pdr_norm = 0.0;
+  if (pdr_norm > 1.0) pdr_norm = 1.0;
+
   double avgDelay = (g_rxData > 0) ? (g_delaySum / double(g_rxData)) : 0.0;
   double thr = (g_simTime > 0) ? (double(g_rxBytes) * 8.0 / g_simTime) : 0.0;
   double avgBlockLat = (g_blocks > 0) ? (g_blockLatencySum / double(g_blocks)) : 0.0;
@@ -522,14 +534,16 @@ static void WriteCsv()
 
   std::ofstream f(g_csvOut, std::ios::out | std::ios::trunc);
   f << "nVehicles,nRsu,simTime,intervalMs,payloadSize,cryptoDelayUsTx,cryptoDelayUsRx,maliciousRate,enableReplayAttack,replayEveryMs,blockIntervalMs,mineDelayMs,"
-       "txData,rxData,replayDrops,sigDrops,pdr,avgDelay_s,throughput_bps,reportsSent,reportsRxAtRsu,blocks,reportsCommitted,avgBlockLatency_s,avgLedgerTrust,"
+       "txData,rxData,expectedRx,replayDrops,sigDrops,pdr_raw,pdr_norm,avgDelay_s,throughput_bps,reportsSent,reportsRxAtRsu,blocks,reportsCommitted,avgBlockLatency_s,avgLedgerTrust,"
        "handoverCount,avgHandoverDelay_s,fastAuthCount,fullAuthCount,rejectCount,trustFastThresh,trustMinThresh,fastAuthDelayMs,fullAuthDelayMs\n";
 
   f << g_nVehicles << "," << g_nRsu << "," << g_simTime << "," << g_intervalMs << "," << g_payloadSize << ","
     << g_cryptoDelayUsTx << "," << g_cryptoDelayUsRx << "," << g_maliciousRate << "," << (g_enableReplayAttack ? 1 : 0) << ","
     << g_replayEveryMs << "," << g_blockIntervalMs << "," << g_mineDelayMs << ","
-    << g_txData << "," << g_rxData << "," << g_replayDrops << "," << g_sigDrops << ","
-    << pdr << "," << avgDelay << "," << thr << ","
+    << g_txData << "," << g_rxData << "," << expectedRx << ","
+    << g_replayDrops << "," << g_sigDrops << ","
+    << pdr_raw << "," << pdr_norm << ","
+    << avgDelay << "," << thr << ","
     << g_reportsSent << "," << g_reportsRxAtRsu << ","
     << g_blocks << "," << g_reportsCommitted << "," << avgBlockLat << "," << avgTrust << ","
     << g_handoverCount << "," << avgHoDelay << ","
@@ -539,8 +553,7 @@ static void WriteCsv()
     << "\n";
 
   f.close();
-}
-
+}  
 /* ===================== main ===================== */
 int main(int argc, char* argv[])
 {

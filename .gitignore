@@ -19,3 +19,21 @@ ns3/results/**/*.dat
 .DS_Store
 *.swp
 *~
+# ns-3 build junk
+build/
+ns-3/
+*.o
+*.log
+
+# Raw experiment runs (too large)
+ns3/results/*/runs/
+
+# Event logs
+*_events.csv
+
+# Python cache
+__pycache__/
+*.pyc
+
+# System
+.DS_Store

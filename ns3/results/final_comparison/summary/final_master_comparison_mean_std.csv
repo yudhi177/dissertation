@@ -1,0 +1,5 @@
+Scenario,nRuns,pdr_norm_mean,avgDelay_s_mean,throughput_bps_mean,avgLedgerTrust_mean,avgHandoverDelay_s_mean,avgBlockLatency_s_mean,pdr_norm_std,avgDelay_s_std,throughput_bps_std,avgLedgerTrust_std,avgHandoverDelay_s_std,avgBlockLatency_s_std
+baseline,5,,0.000123299,256.64,,,,0.0,6.892624105520336e-05,290.3495272942596,0.0,0.0,0.0
+blockchain,5,1.0,0.000662,196156.0,,,,0.0,0.0,0.0,0.0,0.0,0.0
+full,5,0.719434,0.0009560374,144835.2,0.8000668000000001,0.02,0.05,0.06342910039957997,4.8759342441218426e-05,12769.330471876745,0.0009251006431734923,0.0,0.0
+secure,5,0.9610528,0.0006580889999999999,180043.6,,,,0.020703517085268318,7.905694150397997e-09,3878.578966580415,0.0,0.0,0.0
