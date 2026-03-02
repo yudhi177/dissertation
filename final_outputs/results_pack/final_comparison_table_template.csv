@@ -1,0 +1,5 @@
+Scenario,PDR_norm_mean,PDR_norm_std,avgDelay_s_mean,avgDelay_s_std,throughput_bps_mean,throughput_bps_std,replayDrops_mean,sigDrops_mean,avgLedgerTrust_mean,blocks_mean,avgBlockLatency_s_mean,handoverCount_mean,avgHandoverDelay_s_mean
+Baseline,,,,,,,,,,,,,
+Secure (Crypto+Replay),,,,,,,,,,,,,
+Blockchain (Trust Ledger),,,,,,,,,,,,,
+Full Integrated,,,,,,,,,,,,,

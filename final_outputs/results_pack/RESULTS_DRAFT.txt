@@ -1,0 +1,56 @@
+=== RESULTS DRAFT (AUTO-GENERATED) ===
+
+## 1. SUMO Mobility: Impact of Vehicle Density and Speed
+
+We evaluate the integrated secure trust + blockchain V2X model under SUMO-generated mobility. Vehicle density is varied across [10, 30, 50, 80] and speed across [8.3, 13.9, 22.2], with 5 random seeds per condition.
+
+### Key observations (density sweep)
+
+- Normalized PDR remains in the same range across density (example at speed=13.9: 10 vehicles → 0.972, 80 vehicles → 0.815).
+
+- Average delay stays low and stable (speed=13.9: 10 → 0.000781s, 80 → 0.000770s).
+
+- Throughput scales with network load (speed=13.9: 10 → 60016.0 bps, 80 → 441936.0 bps).
+
+- Handover activity increases with mobility interactions when RSU coverage overlaps the road network (speed=13.9: 10 → 0.00, 80 → 1.40).
+
+
+### Figures (density-speed set)
+
+- Fig: pdr_norm_vs_density_speed.png — Normalized PDR vs density (line per speed).
+
+- Fig: delay_vs_density_speed.png — Delay vs density (line per speed).
+
+- Fig: throughput_vs_density_speed.png — Throughput vs density (line per speed).
+
+- Fig: handover_count_vs_density_speed.png — Handover count vs density (line per speed).
+
+- Fig: handover_delay_vs_density_speed.png — Handover delay vs density (line per speed).
+
+- Fig: ledger_trust_vs_density_speed.png — Average ledger trust vs density (line per speed).
+
+
+## 2. Security Stress Tests: Malicious Rate and Trust Threshold Trade-offs
+
+We sweep maliciousRate ([0.0, 0.1, 0.2, 0.4]) and trust thresholds (fast=[0.6, 0.7, 0.8], min=[0.2, 0.3, 0.4]) to quantify the trade-off between availability (FAST authentication) and security (rejecting low-trust nodes).
+
+
+### Figures (final sweep set)
+
+- Fig: pdr_norm_vs_maliciousRate_nveh_*.png — PDR vs malicious rate (per density; lines by speed).
+
+- Fig: delay_vs_maliciousRate_nveh_*.png — Delay vs malicious rate.
+
+- Fig: throughput_vs_maliciousRate_nveh_*.png — Throughput vs malicious rate.
+
+- Fig: ledgerTrust_vs_maliciousRate_nveh_*.png — Ledger trust vs malicious rate (if enabled).
+
+- Fig: heatmap_pdr_norm_thresholds.png — Threshold trade-off heatmap.
+
+- Fig: heatmap_rejectCount_thresholds.png — Rejection behavior vs thresholds.
+
+
+## 3. Summary Table
+
+Table: paper_table_default_thresholds.csv — Mean ± std across 5 seeds under baseline thresholds for each (density, speed, maliciousRate) condition.
+

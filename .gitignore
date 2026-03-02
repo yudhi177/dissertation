@@ -55,3 +55,16 @@ ns-3/
 *.tmp
 *.log
 /tmp/
+
+# ---- heavy generated files (DO NOT COMMIT) ----
+sumo/output/
+**/fcd.xml
+**/*.fcd.xml
+**/ns2mobility.tcl
+**/run.sumocfg
+
+# big per-run dumps (keep publishable pack instead)
+ns3/results/**/runs/
+
+# ---- BUT DO COMMIT THIS ----
+!results_publishable/**

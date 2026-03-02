@@ -1,0 +1,2 @@
+nVehicles,sybilBurst,pdr_norm_mean,avgDelay_s_mean,throughput_bps_mean,avgLedgerTrust_mean,reportsCommitted_mean,avgBlockLatency_s_mean,malReject_mean,honReject_mean,handoverCount_mean,pdr_norm_std,avgDelay_s_std,throughput_bps_std,avgLedgerTrust_std,reportsCommitted_std,avgBlockLatency_s_std,malReject_std,honReject_std,handoverCount_std,nRuns
+30,2,0.333333,0.000764916,193952.0,0.72,1557.0,0.00653333,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1

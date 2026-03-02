@@ -1,0 +1,3 @@
+nVehicles,adaptive,avgBlockLatency_s_mean,reportsCommitted_mean,blocks_mean,avgLedgerTrust_mean,pdr_norm_mean,malReject_mean,honReject_mean,throughput_bps_mean,avgDelay_s_mean,avgBlockLatency_s_std,reportsCommitted_std,blocks_std,avgLedgerTrust_std,pdr_norm_std,malReject_std,honReject_std,throughput_bps_std,avgDelay_s_std,nRuns
+30,0,0.05,190.0,10.0,0.773333,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1
+30,1,0.0224118,196.0,17.0,0.773333,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,1
