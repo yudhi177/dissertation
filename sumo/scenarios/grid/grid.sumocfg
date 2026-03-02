@@ -1,0 +1,17 @@
+<configuration>
+  <input>
+    <net-file value="../../maps/grid/grid.net.xml"/>
+    <route-files value="../../routes/grid/grid.rou.xml"/>
+  </input>
+
+  <time>
+    <begin value="0"/>
+    <end value="200"/>
+    <step-length value="0.1"/>
+  </time>
+
+  <output>
+    <fcd-output value="../../output/grid/fcd.xml"/>
+  </output>
+</configuration>
+

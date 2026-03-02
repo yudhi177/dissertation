@@ -37,3 +37,21 @@ __pycache__/
 
 # System
 .DS_Store
+
+# ---------- SUMO generated outputs ----------
+sumo/output/
+sumo/output/**
+
+# ---------- NS-3 build artifacts ----------
+ns-3/
+**/build/
+**/.waf-*
+**/cmake-cache/
+**/CMakeFiles/
+**/*.o
+**/*.obj
+
+# ---------- Temporary files ----------
+*.tmp
+*.log
+/tmp/
