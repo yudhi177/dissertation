@@ -92,3 +92,11 @@ ns3/results/**
 # ns-3 build artifacts
 ns-3/build/
 ns-3/cmake-cache/
+
+# --- ignore heavy simulation outputs ---
+ns3/results/**/runs/
+ns3/results/**/runs_index.csv
+sumo/output/
+*.ns2mobility.tcl
+*.fcd.xml
+/tmp/
