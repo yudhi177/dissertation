@@ -91,7 +91,7 @@ run_one () {
   local manifest="$RUNSD/${tag}_manifest.json"
 
   # base args
-  local args="--${F_SIMTIME}=${SIM} --${F_CSV}=${csv} --${F_EVT}=${evt}"
+  local args="--${F_SIMTIME}=${SIM} --${F_CSV}=${csv} --${F_EVT}=${evt} --baselineName=${baseline}"
 
   # optional: nVehicles + speed + seed
   if [[ -n "$F_NVEH" ]]; then args="$args --${F_NVEH}=${nveh}"; fi
@@ -108,6 +108,7 @@ run_one () {
       if [[ -n "$F_BC_QD" ]]; then args="$args --${F_BC_QD}=0"; fi
       if [[ -n "$F_BC_UD" ]]; then args="$args --${F_BC_UD}=0"; fi
             if [[ -n "$F_ENABLE_BC" ]]; then args="$args --${F_ENABLE_BC}=0"; fi
+      if [[ -n "$F_BC_PROBE" ]]; then args="$args --${F_BC_PROBE}=0"; fi
 ;;
     TRUST_ONLY)
       if [[ -n "$F_TRUST" ]]; then args="$args --${F_TRUST}=1"; fi
@@ -138,6 +139,15 @@ run_one () {
       if [[ -n "$F_BC_PROBE_PSEU" ]]; then args="$args --${F_BC_PROBE_PSEU}=1"; fi
       if [[ -n "$F_ENABLE_BC" ]]; then args="$args --${F_ENABLE_BC}=1"; fi
 ;;
+    BC_ALWAYS_QUERY)
+      if [[ -n "$F_TRUST" ]]; then args="$args --${F_TRUST}=1"; fi
+      if [[ -n "$F_ENABLE_BC" ]]; then args="$args --${F_ENABLE_BC}=1"; fi
+      if [[ -n "$F_BC_CACHE" ]]; then args="$args --${F_BC_CACHE}=0"; fi
+      if [[ -n "$F_BC_PROBE" ]]; then args="$args --${F_BC_PROBE}=1"; fi
+      if [[ -n "$F_REV" ]]; then args="$args --${F_REV}=0"; fi
+      if [[ -n "$F_PRIV" ]]; then args="$args --${F_PRIV}=0"; fi
+      ;;
+
     FULL)
       if [[ -n "$F_TRUST" ]]; then args="$args --${F_TRUST}=1"; fi
       if [[ -n "$F_REV" ]]; then args="$args --${F_REV}=1"; fi
@@ -197,7 +207,7 @@ PYEOF
   echo "${baseline},${nveh},${spd},${seed},${csv},${evt},\"${bc_line}\",\"${priv_line}\"" >> "$INDEX"
 }
 
-BASELINES=(PKI_ONLY TRUST_ONLY BC_TRUST FULL)
+BASELINES=(PKI_ONLY TRUST_ONLY BC_TRUST BC_ALWAYS_QUERY FULL)
 
 for b in "${BASELINES[@]}"; do
   for n in "${NVEHS[@]}"; do

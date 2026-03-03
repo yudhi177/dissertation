@@ -30,6 +30,8 @@
 using namespace ns3;
 
 
+
+
 // PRIVACY_EVENT_LOGGER_BEGIN
 #include <fstream>
 static std::ofstream* g_eventsPtr = nullptr;
@@ -325,6 +327,24 @@ static double Clamp01(double x)
 ========================================================= */
 static bool     g_enableTrustEngineFinal = false;
 
+// TRUST_CONF_V1_BEGIN
+// Observation-based trust confidence (0..1)
+static uint32_t g_confWindow = 20;        // observations needed for full confidence
+static double   g_confMinForFast = 0.6;   // FAST allowed only if conf >= this
+
+static std::vector<uint32_t> g_trustObs;  // per-vehicle observation count
+static std::vector<double>   g_trustConf; // per-vehicle confidence 0..1
+
+static inline double ComputeConf(uint32_t obs, uint32_t win)
+{
+  if (win == 0) return 1.0;
+  double c = double(obs) / double(win);
+  if (c < 0.0) c = 0.0;
+  if (c > 1.0) c = 1.0;
+  return c;
+}
+// TRUST_CONF_V1_END
+
 // TRUST_STALENESS_V1_BEGIN
 /* =========================================================
    Trust staleness control (Dmax) + staleMismatch metric
@@ -356,6 +376,26 @@ static inline uint32_t TrustAgeMs(uint32_t v)
 // TRUST_STALENESS_V1_END
 
 
+
+
+// STALE_SAMPLING_GATE_V2_BEGIN
+#include <cmath>
+
+static double g_staleEps = 0.02;  // mismatch threshold
+
+static inline void RecordStaleCheck(uint32_t v, double usedTrust, bool cacheHit, uint32_t ageMs)
+{
+  g_staleChecks++;
+
+  // mismatch only meaningful on cacheHit AND stale
+  if (cacheHit && (ageMs > g_trustMaxAgeMs) && (v < g_ledgerTrust.size()))
+  {
+    const double ledger = g_ledgerTrust[v];
+    const double diff = std::fabs(usedTrust - ledger);
+    if (diff > g_staleEps) g_staleMismatchCount++;
+  }
+}
+// STALE_SAMPLING_GATE_V2_END
 static void PrintStaleStats()
 {
   const double rate = g_staleChecks ? (double)g_staleMismatchCount / (double)g_staleChecks : 0.0;
@@ -365,6 +405,7 @@ static void PrintStaleStats()
             << " mismatchRate=" << rate
             << std::endl;
 }
+
 // Cache/sync controls
 static uint32_t g_trustSyncIntervalMs = 1000; // cache TTL / sync interval
 static uint32_t g_trustQueryDelayMs   = 20;   // extra delay on cache miss (ms)
@@ -482,6 +523,11 @@ static void TrustRecompute(uint32_t v)
 
   double Ti = w1*bc + w2*ht + w3*rsu;
   g_trustScore[v] = Clamp01(Ti);
+  if (v < g_trustObs.size()) {
+    g_trustObs[v]++;
+    g_trustConf[v] = ComputeConf(g_trustObs[v], g_confWindow);
+  }
+
 
   // "on-chain" (simulated) commit is throttled by bcSyncIntervalMs
   if (v < g_ledgerTrust.size())
@@ -607,7 +653,16 @@ static void MaybeCommitTrustUpdate(const std::string& key,
                                   double& outExtraDelayMs,
                                   bool& outDidUpdate)
 {
-  outExtraDelayMs = 0.0;
+  
+// BC_COMMIT_GATE_BEGIN
+  if (!g_enableBlockchain)
+  {
+    outExtraDelayMs = 0.0;
+    outDidUpdate = false;
+    return;
+  }
+// BC_COMMIT_GATE_END
+outExtraDelayMs = 0.0;
   outDidUpdate = false;
 
   const double now = NowS();
@@ -641,7 +696,15 @@ static void PrintBcCacheStats()
   double avgQ = g_bcQueries ? (g_bcQueryDelaySumMs / (double)g_bcQueries) : 0.0;
   double avgU = g_bcUpdates ? (g_bcUpdateDelaySumMs / (double)g_bcUpdates) : 0.0;
 
-  std::cout << "[BC] queries=" << g_bcQueries
+  
+// BC_STATS_GATE_BEGIN
+  if (!g_enableBlockchain)
+  {
+    std::cout << "[BC] queries=0 updates=0 cacheHits=0 cacheMisses=0 hitRate=0 avgQms=0 avgUms=0" << std::endl;
+    return;
+  }
+// BC_STATS_GATE_END
+std::cout << "[BC] queries=" << g_bcQueries
             << " updates=" << g_bcUpdates
             << " cacheHits=" << g_cacheHits
             << " cacheMisses=" << g_cacheMisses
@@ -950,6 +1013,9 @@ static void TrustInit()
   g_rsuFeedback.assign(g_nVehicles, 0.80);
   g_lastTrustUpdate.assign(g_nVehicles, -1e9);
   g_trustScore.assign(g_nVehicles, 0.80);
+  g_trustObs.assign(g_nVehicles, 0);
+  g_trustConf.assign(g_nVehicles, 0.0);
+
 
   g_cacheTrust.assign(g_nVehicles, 0.80);
   g_cacheTime.assign(g_nVehicles, -1e9);
@@ -1394,7 +1460,7 @@ static void ProcessData(uint32_t receiverId, DataHdr hdr, uint32_t pktSize)
   if (g_enableRevocation && hdr.senderId < g_revokedVeh.size() && g_revokedVeh[hdr.senderId])
   {
     g_revokeDrops++;
-    LogEvent("DATA_DROP_REVOKED rx=" + std::to_string(receiverId) +
+    LogEvent("DATA_DROP_REVOKED reason=REVOKED reason=REVOKED rx=" + std::to_string(receiverId) +
              " sender=" + std::to_string(hdr.senderId));
     return;
   }
@@ -1410,7 +1476,7 @@ static void ProcessData(uint32_t receiverId, DataHdr hdr, uint32_t pktSize)
     if (cache->Seen(hdr.nonce))
     {
       g_replayDrops++;
-      LogEvent("DATA_DROP_REPLAY rx=" + std::to_string(receiverId) +
+      LogEvent("DATA_DROP_REPLAY reason=REPLAY reason=REPLAY rx=" + std::to_string(receiverId) +
                " sender=" + std::to_string(hdr.senderId));
       if (senderKnown) TriggerSuspicion(receiverId, hdr.senderId, "REPLAY");
       TrustEvidenceBad(hdr.senderId);
@@ -1425,7 +1491,7 @@ static void ProcessData(uint32_t receiverId, DataHdr hdr, uint32_t pktSize)
     if (expect != hdr.sig)
     {
       g_sigDrops++;
-      LogEvent("DATA_DROP_SIG rx=" + std::to_string(receiverId) +
+      LogEvent("DATA_DROP_SIG reason=BAD_SIG reason=BAD_SIG rx=" + std::to_string(receiverId) +
                " sender=" + std::to_string(hdr.senderId));
       if (senderKnown) TriggerSuspicion(receiverId, hdr.senderId, "SIG");
       TrustEvidenceBad(hdr.senderId);
@@ -1618,6 +1684,13 @@ static void CheckHandover(Ptr<Node> veh)
   {
     uint32_t extraTrustDelayMs = 0; bool cacheHit = true;
   double trust = GetTrustForHandover(id, &extraTrustDelayMs, &cacheHit);
+
+  // Freshness gating (Δmax)
+  if (!cacheHit) { TouchTrustSync(id); }  // only on miss we refresh "last sync"
+  const uint32_t ageMs = TrustAgeMs(id);
+  const bool freshOk = (ageMs <= g_trustMaxAgeMs);
+
+  RecordStaleCheck(id, trust, cacheHit, ageMs);
 if (trust < g_trustMinThresh)
     {
       g_rejectCount++;
@@ -1710,6 +1783,59 @@ static void WriteCsv()
 /* =======================
    MAIN
 ======================= */
+
+
+// BASELINE_ASSERTS_V1_BEGIN
+static std::string g_baselineName = "UNSET";
+
+static void AssertBaselineConfig()
+{
+  if (g_baselineName == "PKI_ONLY")
+  {
+    NS_ABORT_MSG_IF(g_enableTrustEngineFinal, "PKI_ONLY violation: trust must be OFF");
+    NS_ABORT_MSG_IF(g_enableBlockchain,      "PKI_ONLY violation: blockchain must be OFF");
+    NS_ABORT_MSG_IF(g_enableRevocation,      "PKI_ONLY violation: revocation must be OFF");
+    NS_ABORT_MSG_IF(g_enablePrivacy,         "PKI_ONLY violation: privacy must be OFF");
+    NS_ABORT_MSG_IF(g_enableBcProbe,         "PKI_ONLY violation: bcProbe must be OFF");
+    NS_ABORT_MSG_IF(g_enableBCLocalCache,    "PKI_ONLY violation: bcCache must be OFF");
+  }
+  else if (g_baselineName == "TRUST_ONLY")
+  {
+    NS_ABORT_MSG_IF(!g_enableTrustEngineFinal, "TRUST_ONLY violation: trust must be ON");
+    NS_ABORT_MSG_IF(g_enableBlockchain,        "TRUST_ONLY violation: blockchain must be OFF");
+    NS_ABORT_MSG_IF(g_enableRevocation,        "TRUST_ONLY violation: revocation must be OFF");
+    NS_ABORT_MSG_IF(g_enablePrivacy,           "TRUST_ONLY violation: privacy must be OFF");
+    NS_ABORT_MSG_IF(g_enableBcProbe,           "TRUST_ONLY violation: bcProbe must be OFF");
+    NS_ABORT_MSG_IF(g_enableBCLocalCache,      "TRUST_ONLY violation: bcCache must be OFF");
+  }
+  else if (g_baselineName == "BC_TRUST")
+  {
+    NS_ABORT_MSG_IF(!g_enableTrustEngineFinal, "BC_TRUST violation: trust must be ON");
+    NS_ABORT_MSG_IF(!g_enableBlockchain,       "BC_TRUST violation: blockchain must be ON");
+  }
+  else if (g_baselineName == "BC_ALWAYS_QUERY")
+  {
+    NS_ABORT_MSG_IF(!g_enableTrustEngineFinal, "BC_ALWAYS_QUERY violation: trust must be ON");
+    NS_ABORT_MSG_IF(!g_enableBlockchain,       "BC_ALWAYS_QUERY violation: blockchain must be ON");
+    NS_ABORT_MSG_IF(g_enableBCLocalCache,      "BC_ALWAYS_QUERY violation: cache must be OFF");
+    NS_ABORT_MSG_IF(!g_enableBcProbe,          "BC_ALWAYS_QUERY violation: probe should be ON");
+  }
+  else if (g_baselineName == "FULL")
+  {
+    NS_ABORT_MSG_IF(!g_enableTrustEngineFinal, "FULL violation: trust must be ON");
+    NS_ABORT_MSG_IF(!g_enableBlockchain,       "FULL violation: blockchain must be ON");
+    NS_ABORT_MSG_IF(!g_enableRevocation,       "FULL violation: revocation must be ON");
+    NS_ABORT_MSG_IF(!g_enablePrivacy,          "FULL violation: privacy must be ON");
+  }
+}
+// BASELINE_ASSERTS_V1_END
+
+
+// SEED_FLAG_V1_BEGIN
+static uint32_t g_seed = 1;
+// SEED_FLAG_V1_END
+
+
 int main(int argc, char* argv[])
 {
   CommandLine cmd;
@@ -1764,12 +1890,21 @@ cmd.AddValue("enableTrustGate","Enable trust-gated handover 0/1", g_enableTrustG
 
   cmd.AddValue("csvOut","CSV output", g_csvOut);
   cmd.AddValue("eventsOut","Events output", g_eventsOut);
+  cmd.AddValue("seed", "Global deterministic seed for all RNG", g_seed);
+  cmd.AddValue("confWindow", "Trust confidence window (observations)", g_confWindow);
+  cmd.AddValue("confMinForFast", "Min confidence to allow FAST", g_confMinForFast);
+
+
+  cmd.AddValue("baselineName", "Baseline label for assertions (PKI_ONLY/TRUST_ONLY/BC_TRUST/BC_ALWAYS_QUERY/FULL)", g_baselineName);
+
   cmd.AddValue("pseudoRotateSec", "Timer-based pseudonym rotation sec", g_pseudoRotateSec);
   cmd.AddValue("rotateOnRsuChange", "Rotate pseudonym on RSU change 0/1", g_rotateOnRsuChange);
 cmd.AddValue("enableTrustEngineFinal", "Enable Trust Engine FINAL v2 0/1", g_enableTrustEngineFinal);
   cmd.AddValue("trustSyncIntervalMs", "Trust cache TTL / sync interval ms", g_trustSyncIntervalMs);
   cmd.AddValue("trustQueryDelayMs", "Extra delay on trust cache miss (ms)", g_trustQueryDelayMs);
   cmd.AddValue("trustMaxAgeMs", "Max allowed trust age for FAST auth (ms)", g_trustMaxAgeMs);
+  cmd.AddValue("staleEps", "Stale mismatch epsilon threshold", g_staleEps);
+
   cmd.AddValue("trustDecayPerSec", "Trust decay per second", g_trustDecayPerSec);
   cmd.AddValue("recoveryPerSec", "False-positive recovery per second", g_recoveryPerSec);
   cmd.AddValue("w1Base", "Base weight BehaviorConsistency", g_w1Base);
@@ -1807,7 +1942,9 @@ cmd.AddValue("forceRevokeVehicle0", "Force revoke vehicle0 0/1", g_forceRevokeVe
   cmd.AddValue("forceRevokeTime", "Force revoke time (s)", g_forceRevokeTime);
 
 cmd.Parse(argc, argv);
-
+  AssertBaselineConfig();
+  SeedManager::SetSeed(g_seed);
+  SeedManager::SetRun(g_seed);
   g_evt.open(g_eventsOut, std::ios::out | std::ios::trunc);
   g_evt << "time,event\n";
 
