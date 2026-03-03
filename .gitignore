@@ -68,3 +68,15 @@ ns3/results/**/runs/
 
 # ---- BUT DO COMMIT THIS ----
 !results_publishable/**
+
+# ---- generated results (do not commit) ----
+ns3/results/
+ns3/results/**
+
+# temporary publish-pack working directory
+ns3/results/publish_pack_baselines/
+
+# ad-hoc sweeps
+ns3/results/bc_sync_sweep.csv
+ns3/results/privacy_mixzone_sweep.csv
+ns3/results/privacy_linkability_sweep/
