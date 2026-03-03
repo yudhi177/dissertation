@@ -97,6 +97,14 @@ else
   echo "  ✅ manifests found: $MCOUNT"
 fi
 
+
+echo "[8] Security outputs exist (revocation + detection)"
+test -f "$PACK/revocation_cdf.png" || { echo "  ❌ missing revocation_cdf.png"; exit 5; }
+test -f "$PACK/revocation_cdf.csv" || { echo "  ❌ missing revocation_cdf.csv"; exit 5; }
+test -f "$PACK/detect_fp.csv"      || { echo "  ❌ missing detect_fp.csv"; exit 5; }
+echo "  ✅ security outputs OK"
+
+
 echo
 echo "✅ FINAL CHECKLIST COMPLETE"
 echo "Publish pack ready at: $PACK"

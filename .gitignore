@@ -80,3 +80,15 @@ ns3/results/publish_pack_baselines/
 ns3/results/bc_sync_sweep.csv
 ns3/results/privacy_mixzone_sweep.csv
 ns3/results/privacy_linkability_sweep/
+
+# ---- generated outputs (do not commit) ----
+ns3/results/
+ns3/results/**
+
+# local temp
+/tmp/
+*.log
+
+# ns-3 build artifacts
+ns-3/build/
+ns-3/cmake-cache/

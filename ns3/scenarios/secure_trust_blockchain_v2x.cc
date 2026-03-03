@@ -1,3 +1,4 @@
+#include <iomanip>
 // ============================================================
 // secure_trust_blockchain_v2x.cc  (CORE UPGRADE v2)
 // - Vehicle-only PDR/Delay/Throughput (fix correctness)
@@ -28,6 +29,20 @@
 
 using namespace ns3;
 
+
+// PRIVACY_EVENT_LOGGER_BEGIN
+#include <fstream>
+static std::ofstream* g_eventsPtr = nullptr;
+
+// Writes: <time>,<event_string>
+static void PrivacyLogEvent(const std::string& ev)
+{
+  if (g_eventsPtr && g_eventsPtr->is_open())
+  {
+    (*g_eventsPtr) << Simulator::Now().GetSeconds() << "," << ev << "\n";
+  }
+}
+// PRIVACY_EVENT_LOGGER_END
 /* =======================
    GLOBAL PARAMETERS
 ======================= */
@@ -310,6 +325,46 @@ static double Clamp01(double x)
 ========================================================= */
 static bool     g_enableTrustEngineFinal = false;
 
+// TRUST_STALENESS_V1_BEGIN
+/* =========================================================
+   Trust staleness control (Dmax) + staleMismatch metric
+   - Tracks last-sync time per vehicle (trustAge)
+   - FAST allowed only if trustAge <= trustMaxAgeMs
+   - staleMismatchCount increments when cached trust differs from ledger trust while stale
+========================================================= */
+static uint32_t g_trustMaxAgeMs = 1000; // Dmax
+static std::vector<uint64_t> g_trustLastSyncMs; // per vehicle
+static uint64_t g_staleMismatchCount = 0;
+static uint64_t g_staleChecks = 0;
+
+static inline uint64_t NowMs() { return (uint64_t)Simulator::Now().GetMilliSeconds(); }
+
+static inline void TouchTrustSync(uint32_t v)
+{
+  if (v >= g_trustLastSyncMs.size()) return;
+  g_trustLastSyncMs[v] = NowMs();
+}
+
+static inline uint32_t TrustAgeMs(uint32_t v)
+{
+  if (v >= g_trustLastSyncMs.size()) return 0;
+  uint64_t now = NowMs();
+  uint64_t last = g_trustLastSyncMs[v];
+  if (last > now) return 0;
+  return (uint32_t)(now - last);
+}
+// TRUST_STALENESS_V1_END
+
+
+static void PrintStaleStats()
+{
+  const double rate = g_staleChecks ? (double)g_staleMismatchCount / (double)g_staleChecks : 0.0;
+  std::cout << "[STALE] maxAgeMs=" << g_trustMaxAgeMs
+            << " staleChecks=" << g_staleChecks
+            << " staleMismatch=" << g_staleMismatchCount
+            << " mismatchRate=" << rate
+            << std::endl;
+}
 // Cache/sync controls
 static uint32_t g_trustSyncIntervalMs = 1000; // cache TTL / sync interval
 static uint32_t g_trustQueryDelayMs   = 20;   // extra delay on cache miss (ms)
@@ -342,8 +397,8 @@ static std::vector<double> g_trustScore;      // final Ti
 // Local trust cache
 static std::vector<double> g_cacheTrust;
 static std::vector<double> g_cacheTime;
-static uint64_t g_trustCacheHits = 0;
-static uint64_t g_trustCacheMiss = 0;
+static uint64_t g_trustCacheHits __attribute__((unused)) = 0;
+static uint64_t g_trustCacheMiss __attribute__((unused)) = 0;
 
 static double CurrentDensity()
 {
@@ -437,14 +492,6 @@ static void TrustRecompute(uint32_t v)
   }
 }
 
-static void TrustEvidenceGood(uint32_t sender)
-{
-  if (!g_enableTrustEngineFinal) return;
-  if (sender >= g_nVehicles) return;
-  g_goodCount[sender]++;
-  TrustRecompute(sender);
-}
-
 static void TrustEvidenceBad(uint32_t sender)
 {
   if (!g_enableTrustEngineFinal) return;
@@ -510,6 +557,7 @@ static void OnChainSetTrustScore(const std::string& key, double trust)
   uint32_t v = 0;
   try { v = (uint32_t)std::stoul(key); } catch (...) { return; }
   if (v < g_ledgerTrust.size()) g_ledgerTrust[v] = trust;
+    TouchTrustSync(v);
 }
 
 static double GetTrustScoreCached(const std::string& key,
@@ -678,7 +726,10 @@ static void PrivacyRotate(uint32_t v, const std::string& reason)
   (void)reason; (void)oldP; (void)newP;
 
   g_pseudoRotations++;
+  PrivacyLogEvent(std::string("PSEUDO_ROTATE v=") + std::to_string(v) + " reason=" + reason);
 
+  // PRIVACY_EVT_BEGIN
+  // PRIVACY_EVT_END
   // ---- Linkability V3 (expected success probability) ----
   // Attempt only if rotations are within time window.
   if (prev > -1e8 && (now - prev) <= g_linkTimeWindowSec)
@@ -686,7 +737,7 @@ static void PrivacyRotate(uint32_t v, const std::string& reason)
     g_linkAttempts++;
 
     const uint32_t k = CountVehNeighborsWithinRadius(v, g_mixRadiusM);
-
+    PrivacyLogEvent(std::string("LINK_ATTEMPT v=") + std::to_string(v) + " k=" + std::to_string(k) + " p=" + std::to_string(1.0 / double(k + 1)));
     // Expected attacker success if there are (k+1) plausible candidates
     g_linkSuccessExp += 1.0 / double(k + 1);
 
@@ -771,6 +822,98 @@ static void StartBcProbes()
   }
 }
 // BC_PROBE_V1_END
+// AUTH_BIND_V1_BEGIN
+/* =========================================================
+   Authenticated Session Binding (v1) + MITM test + AuthProbe
+   - Simulation-friendly binding: tag = H(senderId|ephPub|nonce|tsMs)
+   - MITM mode tampers ephPub at receiver => verification fails
+   - AuthProbe generates periodic handshake attempts so metrics become non-zero
+========================================================= */
+static bool g_enableAuthBind = true;
+static bool g_enableMitmAttack = false;
+
+static bool     g_enableAuthProbe = false;
+static uint32_t g_authProbeIntervalMs = 500;
+
+static uint64_t g_authOk = 0;
+static uint64_t g_authFail = 0;
+static uint64_t g_authFailMitm = 0;
+
+// SimpleSig: stable 32-bit hash (FNV-1a)
+static uint32_t SimpleSig(const std::string& s)
+{
+  uint32_t h = 2166136261u;
+  for (unsigned char c : s)
+  {
+    h ^= (uint32_t)c;
+    h *= 16777619u;
+  }
+  return h;
+}
+
+static uint32_t MakeAuthTag(uint32_t senderId,
+                            const std::string& ephPub,
+                            uint64_t nonce,
+                            uint64_t tsMs)
+{
+  return SimpleSig(std::to_string(senderId) + "|" + ephPub + "|" +
+                   std::to_string(nonce) + "|" + std::to_string(tsMs));
+}
+
+static bool VerifyAuthTag(uint32_t senderId,
+                          std::string ephPub,
+                          uint64_t nonce,
+                          uint64_t tsMs,
+                          uint32_t recvTag,
+                          bool mitmTamper)
+{
+  if (mitmTamper)
+    ephPub += "|MITM";
+  return recvTag == MakeAuthTag(senderId, ephPub, nonce, tsMs);
+}
+
+static void AuthProbeOnce(uint32_t v)
+{
+  if (!g_enableAuthProbe) return;
+
+  const uint64_t tsMs = (uint64_t)Simulator::Now().GetMilliSeconds();
+  const uint64_t nonce = (uint64_t)(tsMs ^ (v * 2654435761u)); // deterministic-ish
+  const std::string ephPub = "E" + std::to_string(v) + "_" + std::to_string(tsMs);
+
+  const uint32_t tag = MakeAuthTag(v, ephPub, nonce, tsMs);
+
+  bool ok = true;
+  if (g_enableAuthBind)
+    ok = VerifyAuthTag(v, ephPub, nonce, tsMs, tag, g_enableMitmAttack);
+
+  if (ok) g_authOk++;
+  else
+  {
+    g_authFail++;
+    if (g_enableMitmAttack) g_authFailMitm++;
+  }
+
+  Simulator::Schedule(MilliSeconds(g_authProbeIntervalMs), &AuthProbeOnce, v);
+}
+
+static void StartAuthProbes()
+{
+  if (!g_enableAuthProbe) return;
+  for (uint32_t v = 0; v < g_nVehicles; ++v)
+  {
+    Simulator::Schedule(MilliSeconds(100 + (v % 10)), &AuthProbeOnce, v);
+  }
+}
+
+static void PrintAuthStats()
+{
+  std::cout << "[AUTH] ok=" << g_authOk
+            << " fail=" << g_authFail
+            << " mitmFail=" << g_authFailMitm
+            << std::endl;
+}
+// AUTH_BIND_V1_END
+
 static double GetTrustForHandover(uint32_t v, uint32_t* extraDelayMs, bool* cacheHit)
 {
   uint32_t dummyDelay = 0;
@@ -785,6 +928,15 @@ static double GetTrustForHandover(uint32_t v, uint32_t* extraDelayMs, bool* cach
 
   *extraDelayMs += (uint32_t)(dms + 0.5);
   *cacheHit = hit;
+
+  // staleness mismatch check (only meaningful when trust is stale)
+  g_staleChecks++;
+  if (TrustAgeMs(v) > g_trustMaxAgeMs && v < g_ledgerTrust.size())
+  {
+    // if returned trust differs from ledger trust by a small epsilon, count mismatch
+    if (std::fabs(t - g_ledgerTrust[v]) > 1e-6) g_staleMismatchCount++;
+  }
+
   return t;
 }
 
@@ -1479,7 +1631,7 @@ if (trust < g_trustMinThresh)
     }
     else
     {
-      bool fast = (trust >= g_trustFastThresh);
+      bool fast = ((trust >= g_trustFastThresh && TrustAgeMs(id) <= g_trustMaxAgeMs));
       uint32_t authDelay = fast ? g_fastAuthDelayMs : g_fullAuthDelayMs;
 
       g_handoverCount++;
@@ -1617,6 +1769,7 @@ cmd.AddValue("enableTrustGate","Enable trust-gated handover 0/1", g_enableTrustG
 cmd.AddValue("enableTrustEngineFinal", "Enable Trust Engine FINAL v2 0/1", g_enableTrustEngineFinal);
   cmd.AddValue("trustSyncIntervalMs", "Trust cache TTL / sync interval ms", g_trustSyncIntervalMs);
   cmd.AddValue("trustQueryDelayMs", "Extra delay on trust cache miss (ms)", g_trustQueryDelayMs);
+  cmd.AddValue("trustMaxAgeMs", "Max allowed trust age for FAST auth (ms)", g_trustMaxAgeMs);
   cmd.AddValue("trustDecayPerSec", "Trust decay per second", g_trustDecayPerSec);
   cmd.AddValue("recoveryPerSec", "False-positive recovery per second", g_recoveryPerSec);
   cmd.AddValue("w1Base", "Base weight BehaviorConsistency", g_w1Base);
@@ -1642,6 +1795,12 @@ cmd.AddValue("cacheTtlMs", "Trust cache TTL (ms)", g_cacheTtlMs);
   cmd.AddValue("mixRadiusM", "Mix-zone radius in meters", g_mixRadiusM);
 
   cmd.AddValue("enableBcProbe", "Enable periodic BC trust queries (probe workload)", g_enableBcProbe);
+
+  cmd.AddValue("enableAuthBind", "Bind ECDH ephemeral key to auth tag", g_enableAuthBind);
+  cmd.AddValue("enableMitmAttack", "MITM test: tamper pubkey at receiver (should fail)", g_enableMitmAttack);
+
+  cmd.AddValue("enableAuthProbe", "Generate periodic auth handshakes (to measure AUTH stats)", g_enableAuthProbe);
+  cmd.AddValue("authProbeIntervalMs", "Auth probe interval per vehicle (ms)", g_authProbeIntervalMs);
   cmd.AddValue("bcProbeIntervalMs", "BC probe interval per vehicle (ms)", g_bcProbeIntervalMs);
   cmd.AddValue("bcProbeUsePseudonym", "Probe uses active pseudonym key when privacy enabled", g_bcProbeUsePseudonym);
 cmd.AddValue("forceRevokeVehicle0", "Force revoke vehicle0 0/1", g_forceRevokeVehicle0);
@@ -1758,8 +1917,10 @@ cmd.Parse(argc, argv);
 
   // Initialize trust + keys + malicious set
   g_ledgerTrust.assign(g_nVehicles, 0.8);
+  g_trustLastSyncMs.assign(g_nVehicles, NowMs());
   PrivacyInit();
   StartBcProbes();
+  StartAuthProbes();
   TrustInit();
   
   if (g_enablePrivacy) {
@@ -1861,7 +2022,8 @@ g_keys.assign(g_nVehicles, 0);
   Simulator::Stop(Seconds(g_simTime));
   Simulator::Run();
     PrintBcCacheStats();
-  PrintPrivacyStats();
+  PrintPrivacyStats();    PrintAuthStats();
+    PrintStaleStats();
   Simulator::Destroy();
 
   if (g_evt.is_open()) g_evt.close();

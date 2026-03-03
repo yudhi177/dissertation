@@ -40,6 +40,7 @@ F_BC_CACHE=$(pick_flag enableBCLocalCache)
 F_BC_SYNC=$(pick_flag bcSyncIntervalMs)
 F_BC_QD=$(pick_flag bcQueryDelayMs)
 F_BC_UD=$(pick_flag bcUpdateDelayMs)
+F_ENABLE_BC=$(pick_flag enableBlockchain)
 F_BC_PROBE=$(pick_flag enableBcProbe)
 F_BC_PROBE_INT=$(pick_flag bcProbeIntervalMs)
 F_BC_PROBE_PSEU=$(pick_flag bcProbeUsePseudonym)
@@ -106,7 +107,23 @@ run_one () {
       if [[ -n "$F_BC_CACHE" ]]; then args="$args --${F_BC_CACHE}=0"; fi
       if [[ -n "$F_BC_QD" ]]; then args="$args --${F_BC_QD}=0"; fi
       if [[ -n "$F_BC_UD" ]]; then args="$args --${F_BC_UD}=0"; fi
-      ;;
+            if [[ -n "$F_ENABLE_BC" ]]; then args="$args --${F_ENABLE_BC}=0"; fi
+;;
+    TRUST_ONLY)
+      if [[ -n "$F_TRUST" ]]; then args="$args --${F_TRUST}=1"; fi
+      if [[ -n "$F_REV" ]]; then args="$args --${F_REV}=0"; fi
+      if [[ -n "$F_PRIV" ]]; then args="$args --${F_PRIV}=0"; fi
+      # blockchain OFF
+      if [[ -n "$F_BC_CACHE" ]]; then args="$args --${F_BC_CACHE}=0"; fi
+      if [[ -n "$F_BC_QD" ]]; then args="$args --${F_BC_QD}=0"; fi
+      if [[ -n "$F_BC_UD" ]]; then args="$args --${F_BC_UD}=0"; fi
+      # probes OFF
+      if [[ -n "$F_BC_PROBE" ]]; then args="$args --${F_BC_PROBE}=0"; fi
+      if [[ -n "$F_BC_PROBE_INT" ]]; then args="$args --${F_BC_PROBE_INT}=200"; fi
+      if [[ -n "$F_BC_PROBE_PSEU" ]]; then args="$args --${F_BC_PROBE_PSEU}=0"; fi
+            if [[ -n "$F_ENABLE_BC" ]]; then args="$args --${F_ENABLE_BC}=0"; fi
+;;
+
     BC_TRUST)
       if [[ -n "$F_TRUST" ]]; then args="$args --${F_TRUST}=1"; fi
       if [[ -n "$F_REV" ]]; then args="$args --${F_REV}=0"; fi
@@ -119,6 +136,7 @@ run_one () {
       if [[ -n "$F_BC_PROBE" ]]; then args="$args --${F_BC_PROBE}=1"; fi
       if [[ -n "$F_BC_PROBE_INT" ]]; then args="$args --${F_BC_PROBE_INT}=200"; fi
       if [[ -n "$F_BC_PROBE_PSEU" ]]; then args="$args --${F_BC_PROBE_PSEU}=1"; fi
+      if [[ -n "$F_ENABLE_BC" ]]; then args="$args --${F_ENABLE_BC}=1"; fi
 ;;
     FULL)
       if [[ -n "$F_TRUST" ]]; then args="$args --${F_TRUST}=1"; fi
@@ -136,6 +154,7 @@ run_one () {
       if [[ -n "$F_BC_PROBE" ]]; then args="$args --${F_BC_PROBE}=1"; fi
       if [[ -n "$F_BC_PROBE_INT" ]]; then args="$args --${F_BC_PROBE_INT}=200"; fi
       if [[ -n "$F_BC_PROBE_PSEU" ]]; then args="$args --${F_BC_PROBE_PSEU}=1"; fi
+      if [[ -n "$F_ENABLE_BC" ]]; then args="$args --${F_ENABLE_BC}=1"; fi
 ;;
     *)
       echo "[ERR] Unknown baseline $baseline"; exit 1;;
@@ -178,7 +197,7 @@ PYEOF
   echo "${baseline},${nveh},${spd},${seed},${csv},${evt},\"${bc_line}\",\"${priv_line}\"" >> "$INDEX"
 }
 
-BASELINES=(PKI_ONLY BC_TRUST FULL)
+BASELINES=(PKI_ONLY TRUST_ONLY BC_TRUST FULL)
 
 for b in "${BASELINES[@]}"; do
   for n in "${NVEHS[@]}"; do
@@ -202,5 +221,9 @@ mkdir -p "$PUB"
 cp -f "$OUTROOT/summary.csv" "$PUB/"
 cp -f "$PLOTSD"/*.png "$PUB/" 2>/dev/null || true
 cp -f "$INDEX" "$PUB/"
+
+
+# --- Security postprocess (revocation CDF + detection/FP) ---
+"$HOME/dissertation/ns3/scripts/postprocess_security_pack.sh" "$OUTROOT/runs" "$PUB"
 
 echo "[PUBLISH] $PUB"
