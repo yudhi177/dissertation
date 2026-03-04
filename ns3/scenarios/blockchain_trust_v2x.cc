@@ -120,7 +120,7 @@ static void LogEvent(const std::string& ev, const std::string& details)
 }
 
 // ---------------- Utils ----------------
-static double Clamp01(double x)
+[[maybe_unused]] static double Clamp01(double x)
 {
   return std::max(0.0, std::min(1.0, x));
 }
