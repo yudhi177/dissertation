@@ -106,3 +106,9 @@ results_publishable/
 ns3/results/
 *.zip
 /tmp/
+
+# ---- results / publish packs ----
+results_publishable/
+ns3/results/
+*.zip
+/tmp/
