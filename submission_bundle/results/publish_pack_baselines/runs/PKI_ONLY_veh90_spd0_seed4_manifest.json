@@ -1,0 +1,10 @@
+{
+  "tag": "PKI_ONLY_veh90_spd0_seed4",
+  "baseline": "PKI_ONLY",
+  "nveh": 90,
+  "speed": 0,
+  "seed": 4,
+  "sim": 60,
+  "args": "--simTime=60 --csvOut=/home/yudhishthar/dissertation/ns3/results/publish_pack_baselines/runs/PKI_ONLY_veh90_spd0_seed4.csv --eventsOut=/home/yudhishthar/dissertation/ns3/results/publish_pack_baselines/runs/PKI_ONLY_veh90_spd0_seed4_events.csv --baselineName=PKI_ONLY --nVehicles=90 --seed=4 --enableTrustEngineFinal=0 --enableRevocation=0 --enablePrivacy=0 --enableBCLocalCache=0 --bcQueryDelayMs=0 --bcUpdateDelayMs=0 --enableBlockchain=0 --enableBcProbe=0",
+  "git_commit": "453d2e1"
+}

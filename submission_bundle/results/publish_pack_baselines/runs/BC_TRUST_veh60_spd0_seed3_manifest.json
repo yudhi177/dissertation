@@ -1,0 +1,10 @@
+{
+  "tag": "BC_TRUST_veh60_spd0_seed3",
+  "baseline": "BC_TRUST",
+  "nveh": 60,
+  "speed": 0,
+  "seed": 3,
+  "sim": 60,
+  "args": "--simTime=60 --csvOut=/home/yudhishthar/dissertation/ns3/results/publish_pack_baselines/runs/BC_TRUST_veh60_spd0_seed3.csv --eventsOut=/home/yudhishthar/dissertation/ns3/results/publish_pack_baselines/runs/BC_TRUST_veh60_spd0_seed3_events.csv --baselineName=BC_TRUST --nVehicles=60 --seed=3 --enableTrustEngineFinal=1 --enableRevocation=0 --enablePrivacy=0 --enableBCLocalCache=1 --bcSyncIntervalMs=500 --bcQueryDelayMs=12 --bcUpdateDelayMs=18 --enableBcProbe=1 --bcProbeIntervalMs=200 --bcProbeUsePseudonym=1 --enableBlockchain=1",
+  "git_commit": "453d2e1"
+}

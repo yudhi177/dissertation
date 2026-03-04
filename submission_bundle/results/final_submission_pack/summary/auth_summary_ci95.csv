@@ -1,0 +1,4 @@
+scenario,authOk_mean,authFail_mean,mitmFail_mean,replayFail_mean,totalHandshakes_mean,successRate_mean,failRate_mean,authOk_std,authFail_std,mitmFail_std,replayFail_std,totalHandshakes_std,successRate_std,failRate_std,authOk_count,authFail_count,mitmFail_count,replayFail_count,totalHandshakes_count,successRate_count,failRate_count,authOk_ci95,authFail_ci95,mitmFail_ci95,replayFail_ci95,totalHandshakes_ci95,successRate_ci95,failRate_ci95
+AUTH_MITM,0.0,100.0,100.0,0.0,100.0,0.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,5,5,5,5,5,5,5,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+AUTH_OK,100.0,0.0,0.0,0.0,100.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,5,5,5,5,5,5,5,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+AUTH_REPLAY,67.0,33.0,0.0,33.0,100.0,0.67,0.33,0.0,0.0,0.0,0.0,0.0,0.0,0.0,5,5,5,5,5,5,5,0.0,0.0,0.0,0.0,0.0,0.0,0.0

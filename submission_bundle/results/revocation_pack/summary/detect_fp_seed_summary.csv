@@ -1,0 +1,9 @@
+scenario,seed,fp_count,fp_rate,mal_detect_time_s
+PROBE0,2,0,,3.70417
+PROBE0,3,0,,3.70461
+PROBE0,4,0,,3.70428
+PROBE0,5,0,,3.70419
+PROBE1,2,0,,3.70417
+PROBE1,3,0,,3.70461
+PROBE1,4,0,,3.70428
+PROBE1,5,0,,3.70419

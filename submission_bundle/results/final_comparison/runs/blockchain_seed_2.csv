@@ -1,0 +1,2 @@
+nVehicles,txData,rxData,pdr,pdr_norm,avgDelay_s,throughput_bps,replayDrops,sigDrops
+30,190,5510,29,1,0.000662,196156,0,0

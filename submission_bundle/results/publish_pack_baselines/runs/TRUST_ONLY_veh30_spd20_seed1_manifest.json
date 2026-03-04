@@ -1,0 +1,10 @@
+{
+  "tag": "TRUST_ONLY_veh30_spd20_seed1",
+  "baseline": "TRUST_ONLY",
+  "nveh": 30,
+  "speed": 20,
+  "seed": 1,
+  "sim": 40,
+  "args": "--simTime=40 --csvOut=/home/yudhishthar/dissertation/ns3/results/publish_pack_baselines/runs/TRUST_ONLY_veh30_spd20_seed1.csv --eventsOut=/home/yudhishthar/dissertation/ns3/results/publish_pack_baselines/runs/TRUST_ONLY_veh30_spd20_seed1_events.csv --baselineName=TRUST_ONLY --nVehicles=30 --seed=1 --enableTrustEngineFinal=1 --enableRevocation=0 --enablePrivacy=0 --enableBCLocalCache=0 --bcQueryDelayMs=0 --bcUpdateDelayMs=0 --enableBcProbe=0 --bcProbeIntervalMs=200 --bcProbeUsePseudonym=0 --enableBlockchain=0",
+  "git_commit": "453d2e1"
+}

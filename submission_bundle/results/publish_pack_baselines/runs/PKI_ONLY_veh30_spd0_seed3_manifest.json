@@ -1,0 +1,10 @@
+{
+  "tag": "PKI_ONLY_veh30_spd0_seed3",
+  "baseline": "PKI_ONLY",
+  "nveh": 30,
+  "speed": 0,
+  "seed": 3,
+  "sim": 60,
+  "args": "--simTime=60 --csvOut=/home/yudhishthar/dissertation/ns3/results/publish_pack_baselines/runs/PKI_ONLY_veh30_spd0_seed3.csv --eventsOut=/home/yudhishthar/dissertation/ns3/results/publish_pack_baselines/runs/PKI_ONLY_veh30_spd0_seed3_events.csv --baselineName=PKI_ONLY --nVehicles=30 --seed=3 --enableTrustEngineFinal=0 --enableRevocation=0 --enablePrivacy=0 --enableBCLocalCache=0 --bcQueryDelayMs=0 --bcUpdateDelayMs=0 --enableBlockchain=0 --enableBcProbe=0",
+  "git_commit": "453d2e1"
+}

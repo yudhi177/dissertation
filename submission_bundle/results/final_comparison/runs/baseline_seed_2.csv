@@ -1,0 +1,2 @@
+nVehicles,simTime,txCount,rxCount,pdr,avgDelay_s,throughput_bps
+30,20,190,235,1.23684,0.000154086,752

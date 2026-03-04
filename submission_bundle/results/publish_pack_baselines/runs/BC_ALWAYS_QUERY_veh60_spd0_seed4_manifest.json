@@ -1,0 +1,10 @@
+{
+  "tag": "BC_ALWAYS_QUERY_veh60_spd0_seed4",
+  "baseline": "BC_ALWAYS_QUERY",
+  "nveh": 60,
+  "speed": 0,
+  "seed": 4,
+  "sim": 60,
+  "args": "--simTime=60 --csvOut=/home/yudhishthar/dissertation/ns3/results/publish_pack_baselines/runs/BC_ALWAYS_QUERY_veh60_spd0_seed4.csv --eventsOut=/home/yudhishthar/dissertation/ns3/results/publish_pack_baselines/runs/BC_ALWAYS_QUERY_veh60_spd0_seed4_events.csv --baselineName=BC_ALWAYS_QUERY --nVehicles=60 --seed=4 --enableTrustEngineFinal=1 --enableBlockchain=1 --enableBCLocalCache=0 --enableBcProbe=1 --enableRevocation=0 --enablePrivacy=0",
+  "git_commit": "453d2e1"
+}

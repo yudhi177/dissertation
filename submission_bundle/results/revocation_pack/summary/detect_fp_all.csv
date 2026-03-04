@@ -1,0 +1,6 @@
+accused,reports,first_report_s,detect_time_s,detected,is_malicious_assumed,false_positive,source
+0,50,0.704318,1.001,1,1,0,FULL_revoke_seed1_detect_fp.csv
+0,50,0.702264,1.00104,1,1,0,FULL_revoke_seed2_detect_fp.csv
+0,39,3.70355,3.70432,1,1,0,FULL_revoke_seed3_detect_fp.csv
+0,74,0.703282,1.00101,1,1,0,FULL_revoke_seed4_detect_fp.csv
+0,136,0.703219,1.20084,1,1,0,FULL_revoke_seed5_detect_fp.csv

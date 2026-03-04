@@ -1,0 +1,5 @@
+nVehicles,speedTag,txAll,pdr_norm_mean,avgDelay_s_mean,throughput_bps_mean,sigDrops_mean,replayDrops_mean,reportsCommitted_mean,avgLedgerTrust_mean,malReject_mean,honReject_mean,handoverCount_mean,avgHandoverDelay_s_mean,pdr_norm_std,avgDelay_s_std,throughput_bps_std,sigDrops_std,replayDrops_std,reportsCommitted_std,avgLedgerTrust_std,malReject_std,honReject_std,handoverCount_std,avgHandoverDelay_s_std,nRuns
+30,13.9,0,0.0,0.0,0.0,6045.0,1984.0,442.0,0.773333,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,5
+30,13.9,1,0.608034,0.00095897,3630990.0,56296.0,0.0,6554.0,0.533333,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,5
+50,13.9,0,0.0,0.0,0.0,9945.0,3264.0,140.0,0.784,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,5
+50,13.9,1,0.716718,0.000678602,12052900.0,137955.0,3264.0,2241.0,0.576,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,5

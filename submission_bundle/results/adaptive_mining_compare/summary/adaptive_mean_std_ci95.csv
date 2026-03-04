@@ -1,0 +1,7 @@
+nVehicles,adaptive,avgBlockLatency_s_mean,reportsCommitted_mean,blocks_mean,avgLedgerTrust_mean,pdr_norm_mean,malReject_mean,honReject_mean,throughput_bps_mean,avgDelay_s_mean,avgBlockLatency_s_std,reportsCommitted_std,blocks_std,avgLedgerTrust_std,pdr_norm_std,malReject_std,honReject_std,throughput_bps_std,avgDelay_s_std,nRuns,avgBlockLatency_s_ci95,reportsCommitted_ci95,blocks_ci95,avgLedgerTrust_ci95,pdr_norm_ci95,malReject_ci95,honReject_ci95,throughput_bps_ci95,avgDelay_s_ci95
+30,0,0.05,442.0,19.0,0.773333,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,5,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+30,1,0.0209535,472.0,43.0,0.773333,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,5,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+50,0,0.05,140.0,19.0,0.784,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,5,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+50,1,0.0353913,148.0,23.0,0.784,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,5,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+80,0,0.05,70.0,19.0,0.79,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,5,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0
+80,1,0.0392857,74.0,21.0,0.79,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,5,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0

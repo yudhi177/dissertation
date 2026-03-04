@@ -1,22 +1,27 @@
 from pathlib import Path
 import re
 
-p = Path.home() / "ns-3/scratch/blockchain_trust_v2x.cc"
-if not p.exists():
-    raise SystemExit(f"[ERR] not found: {p}")
+targets = [
+    Path.home() / "ns-3/scratch/blockchain_trust_v2x.cc",
+    Path.home() / "dissertation/ns3/scenarios/blockchain_trust_v2x.cc",
+]
 
-txt = p.read_text()
+for p in targets:
+    if not p.exists():
+        continue
 
-# Change: static double Clamp01(double x)  ->  [[maybe_unused]] static double Clamp01(double x)
-txt2, n = re.subn(
-    r'^\s*static\s+double\s+Clamp01\s*\(',
-    '[[maybe_unused]] static double Clamp01(',
-    txt,
-    flags=re.M
-)
+    txt = p.read_text()
 
-if n == 0:
-    print("[WARN] Clamp01 signature not found, nothing changed")
-else:
-    p.write_text(txt2)
-    print("[OK] patched Clamp01 unused warning:", p)
+    # Make Clamp01 [[maybe_unused]] so -Werror won't fail
+    txt2 = re.sub(
+        r'^\s*static\s+double\s+Clamp01\s*\(',
+        '[[maybe_unused]] static double Clamp01(',
+        txt,
+        flags=re.M
+    )
+
+    if txt2 != txt:
+        p.write_text(txt2)
+        print("[OK] patched:", p)
+    else:
+        print("[WARN] no Clamp01 pattern matched:", p)

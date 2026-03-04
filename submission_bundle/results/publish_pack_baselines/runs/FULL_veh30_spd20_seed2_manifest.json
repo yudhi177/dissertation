@@ -1,0 +1,10 @@
+{
+  "tag": "FULL_veh30_spd20_seed2",
+  "baseline": "FULL",
+  "nveh": 30,
+  "speed": 20,
+  "seed": 2,
+  "sim": 40,
+  "args": "--simTime=40 --csvOut=/home/yudhishthar/dissertation/ns3/results/publish_pack_baselines/runs/FULL_veh30_spd20_seed2.csv --eventsOut=/home/yudhishthar/dissertation/ns3/results/publish_pack_baselines/runs/FULL_veh30_spd20_seed2_events.csv --baselineName=FULL --nVehicles=30 --seed=2 --enableTrustEngineFinal=1 --enableRevocation=1 --enablePrivacy=1 --rotateOnHandover=1 --pseudoRotateIntervalS=5 --linkWindowS=2 --mixRadiusM=50 --enableBCLocalCache=1 --bcSyncIntervalMs=500 --bcQueryDelayMs=12 --bcUpdateDelayMs=18 --enableBcProbe=1 --bcProbeIntervalMs=200 --bcProbeUsePseudonym=1 --enableBlockchain=1",
+  "git_commit": "453d2e1"
+}
