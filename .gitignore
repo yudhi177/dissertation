@@ -100,3 +100,9 @@ sumo/output/
 *.ns2mobility.tcl
 *.fcd.xml
 /tmp/
+
+# ---- results / publish packs ----
+results_publishable/
+ns3/results/
+*.zip
+/tmp/

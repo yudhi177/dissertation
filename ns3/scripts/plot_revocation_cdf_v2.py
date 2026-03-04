@@ -8,11 +8,12 @@ if len(sys.argv) != 3:
 
 df = pd.read_csv(sys.argv[1])
 
-xcol = "delay_s" if "delay_s" in df.columns else df.columns[0]
-ycol = "cdf" if "cdf" in df.columns else df.columns[-1]
+xcol = "delay_s" if "delay_s" in df.columns else ("delay" if "delay" in df.columns else None)
+if xcol is None or "cdf" not in df.columns:
+    raise SystemExit("[ERR] expected columns delay_s/delay and cdf")
 
 plt.figure()
-plt.plot(df[xcol], df[ycol], marker="o")
+plt.plot(df[xcol], df["cdf"], marker="o")
 plt.xlabel("Revocation propagation delay (s)")
 plt.ylabel("CDF")
 plt.title("Revocation Propagation Delay CDF")
