@@ -23,3 +23,27 @@
 ---
 
 ## Repository Structure (high level)
+.
+├─ ns3/
+│ ├─ scenarios/ # main ns-3 C++ scenario files
+│ ├─ scripts/ # run / aggregate / plot scripts
+│ ├─ results/ # generated CSV + plots (summaries + publishable outputs)
+│ ├─ trust/ crypto/ privacy/ attacks/ model/ session/
+├─ sumo/ # mobility traces / helpers (if used)
+├─ blockchain/ # blockchain placeholders / scripts (if used)
+├─ experiments/ # orchestration scripts (if used)
+├─ submission_bundle/ # final submission-ready outputs
+├─ docs/ # diagrams / notes / reproducibility
+└─ data/ # static input data (if used)
+
+
+---
+
+## Build ns-3 (recommended workflow)
+Run these inside your ns-3 workspace:
+
+```bash
+cd ~/ns-3
+./ns3 clean
+./ns3 configure
+./ns3 build
