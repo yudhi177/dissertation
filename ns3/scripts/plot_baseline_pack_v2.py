@@ -12,22 +12,20 @@ order = ["PKI_ONLY","TRUST_ONLY","BC_TRUST","BC_ALWAYS_QUERY","FULL"]
 df["baseline"] = pd.Categorical(df["baseline"], categories=order, ordered=True)
 df = df.sort_values("baseline")
 
-def pick(cands):
-    for c in cands:
-        if c in df.columns:
-            return c
+def pick(base_names):
+    for b in base_names:
+        if f"{b}_mean" in df.columns:
+            return b
     return None
 
-pdr_col   = pick(["PDR_mean","pdr_mean","pdr_mean_mean"])
-delay_col = pick(["avgDelay_mean","delay_mean","avgDelayMs_mean","handoverDelayMs_mean"])
-thr_col   = pick(["throughput_mean","Throughput_mean","thr_mean"])
+PDR  = pick(["PDR","pdr"])
+DELAY= pick(["avgDelay","delay","handoverDelayMs"])
+THR  = pick(["throughput","Throughput","thr"])
 
-def dot(metric_mean, title, fname):
-    base = metric_mean.replace("_mean","")
-    y = df[metric_mean]
-    e = df[base + "_ci95"] if (base + "_ci95") in df.columns else 0
+def bar(base, title, fname):
+    y = df[f"{base}_mean"]
+    e = df[f"{base}_ci95"] if f"{base}_ci95" in df.columns else 0
     x = list(range(len(df)))
-
     plt.figure()
     plt.errorbar(x, y, yerr=e, fmt="o", capsize=4)
     plt.xticks(x, df["baseline"], rotation=15)
@@ -37,11 +35,8 @@ def dot(metric_mean, title, fname):
     plt.savefig(os.path.join(OUT, fname))
     plt.close()
 
-if pdr_col:
-    dot(pdr_col, "PDR by baseline (mean ± CI95)", "pdr_baselines.png")
-if delay_col:
-    dot(delay_col, "Delay by baseline (mean ± CI95)", "delay_baselines.png")
-if thr_col:
-    dot(thr_col, "Throughput by baseline (mean ± CI95)", "throughput_baselines.png")
+if PDR:   bar(PDR,   "PDR by baseline (mean ± CI95)",        "pdr_baselines.png")
+if DELAY: bar(DELAY, "Delay by baseline (mean ± CI95)",      "delay_baselines.png")
+if THR:   bar(THR,   "Throughput by baseline (mean ± CI95)", "throughput_baselines.png")
 
 print("[OK] plots in", OUT)

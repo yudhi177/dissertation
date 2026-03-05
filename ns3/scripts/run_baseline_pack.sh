@@ -4,55 +4,41 @@ cd ~/ns-3
 
 OUTD="$HOME/dissertation/ns3/results/baseline_pack"
 RUNS="$OUTD/runs"
-mkdir -p "$RUNS"
+mkdir -p "$RUNS" "$OUTD/summary" "$OUTD/plots"
 
 SEEDS=(1 2 3 4 5)
 SIM=20
-NVEH=60
 
-common_no_attack=(
-  --simTime=$SIM
-  --nVehicles=$NVEH
-  --attackMode=0
-  --maliciousRate=0.0
-  --enableReplayAttack=0
-)
+# Common threat setting (same across baselines for fair ablation)
+ATTACK_MODE=2
+MAL_RATE=0.2
 
 run_one () {
   local b="$1"
   local seed="$2"
-  local tag="${b}_seed${seed}"
-  local csv="/tmp/${tag}.csv"
-  local evt="/tmp/${tag}_events.csv"
-  local log="$RUNS/${tag}.log"
 
-  # baseline-specific switches (MUST match baseline asserts)
-  local extra=()
+  local csv="/tmp/${b}_seed${seed}.csv"
+  local evt="/tmp/${b}_seed${seed}_events.csv"
+  local log="$RUNS/${b}_seed${seed}.log"
+
+  local trustFinal=0 trustGate=0 bc=0 cache=0 bcProbe=0 priv=0 rev=0
+  local bcProbeInt=200
+
   case "$b" in
     PKI_ONLY)
-      extra+=( --enableTrustEngineFinal=0 --enableTrustGate=0 )
-      extra+=( --enableBlockchain=0 --enableBCLocalCache=0 --enableBcProbe=0 )
-      extra+=( --enablePrivacy=0 --enableRevocation=0 )
+      trustFinal=0; trustGate=0; bc=0; cache=0; bcProbe=0; priv=0; rev=0
       ;;
     TRUST_ONLY)
-      extra+=( --enableTrustEngineFinal=1 --enableTrustGate=1 )
-      extra+=( --enableBlockchain=0 --enableBCLocalCache=0 --enableBcProbe=0 )
-      extra+=( --enablePrivacy=0 --enableRevocation=0 )
+      trustFinal=1; trustGate=1; bc=0; cache=0; bcProbe=0; priv=0; rev=0
       ;;
     BC_TRUST)
-      extra+=( --enableTrustEngineFinal=1 --enableTrustGate=1 )
-      extra+=( --enableBlockchain=1 --enableBCLocalCache=1 --enableBcProbe=0 )
-      extra+=( --enablePrivacy=0 --enableRevocation=0 )
+      trustFinal=1; trustGate=1; bc=1; cache=1; bcProbe=0; priv=0; rev=0
       ;;
     BC_ALWAYS_QUERY)
-      extra+=( --enableTrustEngineFinal=1 --enableTrustGate=1 )
-      extra+=( --enableBlockchain=1 --enableBCLocalCache=0 --enableBcProbe=1 --bcProbeIntervalMs=200 )
-      extra+=( --enablePrivacy=0 --enableRevocation=0 )
+      trustFinal=1; trustGate=1; bc=1; cache=0; bcProbe=1; priv=0; rev=0
       ;;
     FULL)
-      extra+=( --enableTrustEngineFinal=1 --enableTrustGate=1 )
-      extra+=( --enableBlockchain=1 --enableBCLocalCache=1 --enableBcProbe=1 --bcProbeIntervalMs=200 )
-      extra+=( --enablePrivacy=1 --enableRevocation=1 )
+      trustFinal=1; trustGate=1; bc=1; cache=1; bcProbe=1; priv=1; rev=1
       ;;
     *)
       echo "[ERR] unknown baseline: $b" >&2
@@ -61,14 +47,18 @@ run_one () {
   esac
 
   ./ns3 run "scratch/secure_trust_blockchain_v2x \
-    --baselineName=${b} --seed=${seed} \
+    --simTime=${SIM} \
     --csvOut=${csv} --eventsOut=${evt} \
-    ${common_no_attack[*]} \
-    ${extra[*]}" | tee "$log"
+    --baselineName=${b} --seed=${seed} \
+    --enableTrustEngineFinal=${trustFinal} --enableTrustGate=${trustGate} \
+    --enableBlockchain=${bc} --enableBCLocalCache=${cache} \
+    --enableBcProbe=${bcProbe} --bcProbeIntervalMs=${bcProbeInt} \
+    --enablePrivacy=${priv} --enableRevocation=${rev} \
+    --attackMode=${ATTACK_MODE} --maliciousRate=${MAL_RATE}" | tee "$log"
 
-  cp -f "$csv" "$RUNS/${tag}.csv"
-  cp -f "$evt" "$RUNS/${tag}_events.csv"
-  echo "[OK] $tag"
+  cp -f "$csv" "$RUNS/${b}_seed${seed}.csv"
+  cp -f "$evt" "$RUNS/${b}_seed${seed}_events.csv"
+  echo "[OK] ${b}_seed${seed}"
 }
 
 BASELINES=(PKI_ONLY TRUST_ONLY BC_TRUST BC_ALWAYS_QUERY FULL)

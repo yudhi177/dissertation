@@ -112,3 +112,18 @@ results_publishable/
 ns3/results/
 *.zip
 /tmp/
+
+# ns-3 build/cache (if ever copied)
+build/
+cmake-cache/
+.lock-ns3_*
+
+# results (raw runs can be huge)
+ns3/results/**/master_events_summary.csv
+ns3/results/**/master_metrics_summary.csv
+ns3/results/**/events*.csv
+
+# big generated folders (keep only what you want)
+ns3/results/plots_all/
+submission_bundle_final/
+*.BROKEN_BACKUP

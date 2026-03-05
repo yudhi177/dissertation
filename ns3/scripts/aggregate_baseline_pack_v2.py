@@ -29,21 +29,22 @@ raw.to_csv(os.path.join(OUT, "raw.csv"), index=False)
 if raw.empty:
     raise SystemExit(f"[ERR] No run CSVs found in {RUNS}")
 
-def ci95(s):
-    s = pd.to_numeric(s, errors="coerce").dropna()
-    if len(s) <= 1:
+def ci95(x):
+    x = pd.to_numeric(x, errors="coerce").dropna()
+    if len(x) <= 1:
         return 0.0
-    return 1.96 * s.std(ddof=1) / np.sqrt(len(s))
+    return 1.96 * x.std(ddof=1) / np.sqrt(len(x))
 
 metrics = [c for c in raw.columns if c not in ("baseline", "seed")]
-grp = raw.groupby("baseline")
+grp = raw.groupby("baseline", as_index=False)
 
 mean = grp[metrics].mean(numeric_only=True).add_suffix("_mean")
 std  = grp[metrics].std(numeric_only=True, ddof=1).add_suffix("_std")
 cnt  = grp[metrics].count().add_suffix("_count")
-ci   = grp[metrics].agg(ci95).add_suffix("_ci95")
 
-out = pd.concat([mean, std, cnt, ci], axis=1).reset_index()
+ci = raw.groupby("baseline")[metrics].apply(lambda g: g.apply(ci95)).add_suffix("_ci95").reset_index()
+
+out = mean.merge(std, on="baseline").merge(cnt, on="baseline").merge(ci, on="baseline")
 out.to_csv(os.path.join(OUT, "summary_ci95.csv"), index=False)
 
 print("[OK] wrote", os.path.join(OUT, "summary_ci95.csv"))
