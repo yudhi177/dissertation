@@ -127,3 +127,20 @@ ns3/results/**/events*.csv
 ns3/results/plots_all/
 submission_bundle_final/
 *.BROKEN_BACKUP
+# OS / editor
+.DS_Store
+*.swp
+*.tmp
+
+# Python
+__pycache__/
+*.pyc
+
+# ns-3 build outputs (workspace usually outside repo, but safe)
+build/
+cmake-cache/
+.lock-ns3_linux_build
+
+# Large generated outputs (adjust based on what you want to keep)
+ns3/results/**/runs/
+ns3/results/**/tmp/

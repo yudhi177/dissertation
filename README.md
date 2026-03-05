@@ -1,26 +1,43 @@
+# Secure Trust-Based V2X Communication with Blockchain Support (ns-3)
 
-## NS-3 Experiments
+4th Year Dissertation Project (V2X / VANET simulation in ns-3)
 
-### 1. Urban V2X Baseline
-- File: ns3/scenarios/urban_v2x.cc
-- Outputs: ns3/results/metrics_*.csv
+**Core idea:** Trust-based RSU handover + security attacks + blockchain-backed trust + privacy controls.
 
-### 2. RSU Handover with Trust
-- File: ns3/scenarios/rsu_handover.cc
-- Outputs: ns3/results/handover_*.csv
-- Aggregated summary: master_summary.csv
-- Plot: handover_delay_vs_speed.png
+---
 
-### 3. Secure V2X (Crypto + Replay Attack)
-- File: ns3/scenarios/secure_v2x.cc
-- Outputs: secure_200us.csv, secure_replay.csv
-=======
-## Blockchain Trust V2X (ns-3)
+## Project Highlights
+- **Trust-based RSU handover** (FAST vs FULL authentication behavior)
+- **Security evaluation**: simulated crypto delay + replay / sybil / signature-corruption style attacks
+- **Blockchain-backed trust (simulated)**: trust commits + optional trust cache
+- **Privacy controls**: pseudonym rotation + linkability / mix-zone style evaluation
+- **Automation**: experiment scripts + CSV aggregation + plots for results
 
-### Scenario
-- `ns3/scenarios/blockchain_trust_v2x.cc`
+---
 
-### Example run (in your ns-3 workspace)
+## Repository Structure
+- `ns3/`
+  - `scenarios/` → ns-3 C++ scenario(s), especially `secure_trust_blockchain_v2x.cc`
+  - `scripts/` → run/aggregate/plot scripts
+  - `results/` → experiment outputs (CSV summaries + plots)
+- `docs/` → reproducibility notes + explanation of results
+- `submission_bundle/` → final “submission-ready” copy (scenario + scripts + selected outputs)
+- `blockchain/` → optional prototype utilities (only if used)
+- `sumo/` → optional SUMO artifacts (only if used)
+
+---
+
+## Prerequisites
+- ns-3 (CMake/Ninja based)
+- C++ compiler (g++)
+- Python 3 (for scripts + plotting)
+
+---
+
+## Build ns-3 (recommended workflow)
+Run these inside your **ns-3 workspace** (not inside this repo):
 ```bash
-./ns3 run "scratch/blockchain_trust_v2x --nVehicles=10 --nRsu=2 --simTime=20 --cryptoDelayUsTx=200 --cryptoDelayUsRx=200 --enableReplayAttack=1 --maliciousRate=0.2 --blockIntervalMs=1000 --mineDelayMs=50 --csvOut=blockchain_runs/bc_metrics_m0.2.csv --eventsOut=blockchain_runs/bc_events_m0.2.csv"
->>>>>>> 8f8b7dc (Complete Secure Trust-Based V2X with Blockchain:)
+cd ~/ns-3
+./ns3 clean
+./ns3 configure
+./ns3 build
