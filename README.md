@@ -1,47 +1,41 @@
 # Secure Trust-Based V2X Communication with Blockchain Support (ns-3)
 
-4th Year Dissertation Implementation (V2X / VANET)  
+4th Year Dissertation Project (V2X / VANET simulation in ns-3)
+
 **Core idea:** Trust-based RSU handover + security attacks + blockchain-backed trust + privacy controls.
 
 ---
 
 ## Project Highlights
-- **Trust-based RSU handover** with FAST vs FULL authentication behavior
-- **Security evaluation**: simulated crypto delay + replay/sybil/sig-corruption style attacks
-- **Blockchain-backed trust (simulated)** with optional trust cache behavior
-- **Privacy controls**: pseudonym rotation + linkability/mix-zone style evaluation
-- **Automation**: experiment scripts + CSV aggregation + plots
+- **Trust-based RSU handover** (FAST vs FULL authentication behavior)
+- **Security evaluation**: simulated crypto delay + replay / sybil / signature-corruption style attacks
+- **Blockchain-backed trust (simulated)**: trust commits + optional trust cache
+- **Privacy controls**: pseudonym rotation + linkability / mix-zone style evaluation
+- **Automation**: experiment scripts + CSV aggregation + plots for results
 
 ---
 
-## What this repo contains
-- **ns-3 scenarios (C++)** for V2X simulation
-- **Python scripts** for experiments, aggregation, plotting
-- **Results**: CSV summaries + publishable plots
-- **Submission bundle**: final files used for evaluation/submission
+## Repository Structure
+- `ns3/`
+  - `scenarios/` → ns-3 C++ scenario(s), especially `secure_trust_blockchain_v2x.cc`
+  - `scripts/` → run/aggregate/plot scripts
+  - `results/` → experiment outputs (CSV summaries + plots)
+- `docs/` → reproducibility notes + explanation of results
+- `submission_bundle/` → final “submission-ready” copy (scenario + scripts + selected outputs)
+- `blockchain/` → optional prototype utilities (only if used)
+- `sumo/` → optional SUMO artifacts (only if used)
 
 ---
 
-## Repository Structure (high level)
-.
-├─ ns3/
-│ ├─ scenarios/ # main ns-3 C++ scenario files
-│ ├─ scripts/ # run / aggregate / plot scripts
-│ ├─ results/ # generated CSV + plots (summaries + publishable outputs)
-│ ├─ trust/ crypto/ privacy/ attacks/ model/ session/
-├─ sumo/ # mobility traces / helpers (if used)
-├─ blockchain/ # blockchain placeholders / scripts (if used)
-├─ experiments/ # orchestration scripts (if used)
-├─ submission_bundle/ # final submission-ready outputs
-├─ docs/ # diagrams / notes / reproducibility
-└─ data/ # static input data (if used)
-
+## Prerequisites
+- ns-3 (CMake/Ninja based)
+- C++ compiler (g++)
+- Python 3 (for scripts + plotting)
 
 ---
 
 ## Build ns-3 (recommended workflow)
-Run these inside your ns-3 workspace:
-
+Run these inside your **ns-3 workspace** (not inside this repo):
 ```bash
 cd ~/ns-3
 ./ns3 clean
