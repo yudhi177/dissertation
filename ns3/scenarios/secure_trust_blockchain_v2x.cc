@@ -124,6 +124,8 @@ static const uint16_t g_dataPort   = 9000;
 static const uint16_t g_reportPort = 9100;
 
 
+static void RotatePseudonym(uint32_t v, const std::string& reason);
+
 // PRIVACY_MODULE_V1_BEGIN
 /* =========================================================
    PRIVACY MODULE (v1)
@@ -630,9 +632,10 @@ static double GetTrustScoreCached(const std::string& key,
   }
 
   auto it = g_trustCache.find(key);
-  [[maybe_unused]] const double now = NowS();
-  [[maybe_unused]] const double ttlS = double(g_cacheTtlMs) / 1000.0;
-  if (it != g_trustCache.end() && it->second.valid)
+  const double now = NowS();
+  const double ttlS = double(g_cacheTtlMs) / 1000.0;
+  if (it != g_trustCache.end() && it->second.valid &&
+      ((now - it->second.lastFetchS) <= ttlS))
   {
     g_cacheHits++;
     outCacheHit = true;
@@ -649,6 +652,7 @@ static double GetTrustScoreCached(const std::string& key,
   TrustCacheEntry e;
   e.trust = t;
   e.valid = true;
+  e.lastFetchS = now;
   g_trustCache[key] = e;
 
   return t;
@@ -659,7 +663,7 @@ static void MaybeCommitTrustUpdate(const std::string& key,
                                   double& outExtraDelayMs,
                                   bool& outDidUpdate)
 {
-  
+
 // BC_COMMIT_GATE_BEGIN
   if (!g_enableBlockchain)
   {
@@ -668,9 +672,9 @@ static void MaybeCommitTrustUpdate(const std::string& key,
     return;
   }
 // BC_COMMIT_GATE_END
-outExtraDelayMs = 0.0;
+  outExtraDelayMs = 0.0;
   outDidUpdate = false;
-  [[maybe_unused]] const double now = NowS();
+  const double now = NowS();
   const double intervalS = double(g_bcSyncIntervalMs) / 1000.0;
   const double last = (g_lastBcUpdateS.count(key) ? g_lastBcUpdateS[key] : -1e9);
 
@@ -680,6 +684,7 @@ outExtraDelayMs = 0.0;
     auto &e = g_trustCache[key];
     e.trust = newTrust;
     e.valid = true;
+    e.lastFetchS = now;
   }
 
   if ((now - last) < intervalS)
@@ -834,8 +839,12 @@ static void PrivacyInit()
       g_pseudoPool[v].push_back(MakePseudo(v, k));
   }
 
-  for (uint32_t v = 0; v < g_nVehicles; ++v)
-    Simulator::Schedule(Seconds(g_pseudoRotateSec), &PrivacyRotateTimer, v);
+  // NOTE:
+  // The actual pseudonym used on the wire is maintained by the
+  // numeric pseudonym module (InitPseudonyms / RotatePseudonym).
+  // We keep this string pool only for probe-key variation and
+  // do not schedule a second rotation timer here, otherwise
+  // privacy metrics get double-counted.
 }
 
 static void PrintPrivacyStats()
@@ -1100,14 +1109,6 @@ static double GetTrustForHandover(uint32_t v, uint32_t* extraDelayMs, bool* cach
   *extraDelayMs += (uint32_t)(dms + 0.5);
   *cacheHit = hit;
 
-  // staleness mismatch check (only meaningful when trust is stale)
-  g_staleChecks++;
-  if (TrustAgeMs(v) > g_trustMaxAgeMs && v < g_ledgerTrust.size())
-  {
-    // if returned trust differs from ledger trust by a small epsilon, count mismatch
-    if (std::fabs(t - g_ledgerTrust[v]) > 1e-6) g_staleMismatchCount++;
-  }
-
   return t;
 }
 
@@ -1264,6 +1265,13 @@ static void RotatePseudonym(uint32_t v, const std::string& reason)
   st.idx = (st.idx + 1) % st.pool.size();
   uint64_t newPseudo = st.pool[st.idx];
 
+  // Keep the string pseudonym pool in sync with the numeric on-wire pseudonym.
+  if (v < g_pseudoIdx.size() && v < g_pseudoPool.size() && !g_pseudoPool[v].empty())
+  {
+    g_pseudoIdx[v] = (g_pseudoIdx[v] + 1) % (uint32_t)g_pseudoPool[v].size();
+    g_lastRotateS[v] = Simulator::Now().GetSeconds();
+  }
+
   EvaluateLinkability(v, newPseudo, reason);
 
   g_activePseudo[v] = newPseudo;
@@ -1378,15 +1386,21 @@ static void RevocationSyncTick(uint32_t nodeId)
   Simulator::Schedule(MilliSeconds(g_revokeSyncIntervalMs), &RevocationSyncTick, nodeId);
 }
 
-static void RevocationMonitorTick()
+static void StartRevocationSupport()
 {
   if (!g_enableRevocation) return;
-  for (uint32_t v = 0; v < g_nVehicles; v++)
-  {
-    if (v < g_ledgerTrust.size() && !g_revokedVeh[v] && g_ledgerTrust[v] < g_revokeTrustThresh)
-      IssueRevocation(v, "TRUST_BELOW_THRESH");
-  }
-  Simulator::Schedule(Seconds(0.5), &RevocationMonitorTick);
+
+  g_revokedVeh.assign(g_nVehicles, 0);
+  g_revokeKnown.assign(NodeList::GetNNodes(), 0);
+  g_revokeKnownTime.assign(NodeList::GetNNodes(), -1e9);
+  g_revokeIssueTime = -1e9;
+
+  Simulator::Schedule(Seconds(0.6), &RevocationMonitorTick);
+  for (uint32_t i = 0; i < NodeList::GetNNodes(); i++)
+    Simulator::Schedule(MilliSeconds(g_revokeSyncIntervalMs), &RevocationSyncTick, i);
+
+  if (g_forceRevokeVehicle0)
+    Simulator::Schedule(Seconds(g_forceRevokeTime), &IssueRevocation, 0, std::string("FORCED"));
 }
 // REVOCATION_MODULE_V1_END
 
@@ -1494,18 +1508,6 @@ static void CommitNow()
   }
 
   Simulator::Schedule(MilliSeconds(nextInterval), &StartBlockchain);
-
-  // Revocation init + scheduling
-  if (g_enableRevocation) {
-    g_revokedVeh.assign(g_nVehicles, 0);
-    g_revokeKnown.assign(NodeList::GetNNodes(), 0);
-    g_revokeKnownTime.assign(NodeList::GetNNodes(), -1e9);
-    Simulator::Schedule(Seconds(0.6), &RevocationMonitorTick);
-    for (uint32_t i = 0; i < NodeList::GetNNodes(); i++)
-      Simulator::Schedule(MilliSeconds(g_revokeSyncIntervalMs), &RevocationSyncTick, i);
-    if (g_forceRevokeVehicle0)
-      Simulator::Schedule(Seconds(g_forceRevokeTime), &IssueRevocation, 0, std::string("FORCED"));
-  }
 }
 
 static void StartBlockchain()
@@ -1754,8 +1756,7 @@ static void FinishHandover(uint32_t v, int32_t target, bool fast, uint32_t authD
   else      { if (mal) g_malFull++; else g_honFull++; }
 
   LogEvent("HO_DONE v=" + std::to_string(v) +
-
-" to=" + std::to_string(target) +
+           " to=" + std::to_string(target) +
            " mode=" + std::string(fast ? "FAST" : "FULL") +
            " authMs=" + std::to_string(authDelayMs) +
            " hoDelay=" + std::to_string(delay));
@@ -1764,7 +1765,7 @@ static void FinishHandover(uint32_t v, int32_t target, bool fast, uint32_t authD
   // Rotate pseudonym on handover completion (privacy boost at RSU boundary)
   if (g_enablePrivacy && g_rotateOnHandover)
   {
-    PrivacyRotate(v, "HO_DONE");
+    RotatePseudonym(v, "HO_DONE");
   }
 // PRIVACY_HO_ROTATE_HOOK_END
 }
@@ -1790,19 +1791,19 @@ static void CheckHandover(Ptr<Node> veh)
 
   if (target != -1 && target != current && !g_vs[id].authInProgress)
   {
-    uint32_t extraTrustDelayMs = 0; bool cacheHit = true;
-  double trust = GetTrustForHandover(id, &extraTrustDelayMs, &cacheHit);
+    uint32_t extraTrustDelayMs = 0;
+    bool cacheHit = true;
+    double trust = GetTrustForHandover(id, &extraTrustDelayMs, &cacheHit);
 
-  // Freshness gating (Δmax)
-  if (!cacheHit) { TouchTrustSync(id); }  // only on miss we refresh "last sync"
-  const uint32_t ageMs = TrustAgeMs(id);
-  RecordStaleCheck(id, trust, cacheHit, ageMs);
+    // Freshness + confidence gating for FAST handover
+    if (!cacheHit) { TouchTrustSync(id); }  // only on miss we refresh "last sync"
+    const uint32_t ageMs = TrustAgeMs(id);
+    const double conf = (id < g_trustConf.size()) ? g_trustConf[id] : 0.0;
+    const bool freshOk = (ageMs <= g_trustMaxAgeMs);
+    const bool confOk = (conf >= g_confMinForFast);
+    RecordStaleCheck(id, trust, cacheHit, ageMs);
 
-  const bool freshOk = (ageMs <= g_trustMaxAgeMs);
-
-  (void)freshOk;
-  (void)freshOk;
-if (trust < g_trustMinThresh)
+    if (trust < g_trustMinThresh)
     {
       g_rejectCount++;
       bool mal = g_isMalicious[id];
@@ -1811,11 +1812,13 @@ if (trust < g_trustMinThresh)
       LogEvent("HO_REJECT v=" + std::to_string(id) +
                " from=" + std::to_string(current) +
                " to=" + std::to_string(target) +
-               " trust=" + std::to_string(trust));
+               " trust=" + std::to_string(trust) +
+               " ageMs=" + std::to_string(ageMs) +
+               " conf=" + std::to_string(conf));
     }
     else
     {
-      bool fast = ((trust >= g_trustFastThresh && TrustAgeMs(id) <= g_trustMaxAgeMs));
+      bool fast = (trust >= g_trustFastThresh && freshOk && confOk);
       uint32_t authDelay = fast ? g_fastAuthDelayMs : g_fullAuthDelayMs;
 
       g_handoverCount++;
@@ -1826,6 +1829,8 @@ if (trust < g_trustMinThresh)
                " from=" + std::to_string(current) +
                " to=" + std::to_string(target) +
                " trust=" + std::to_string(trust) +
+               " ageMs=" + std::to_string(ageMs) +
+               " conf=" + std::to_string(conf) +
                " mode=" + std::string(fast ? "FAST" : "FULL"));
 
       Simulator::Schedule(MilliSeconds(authDelay),
@@ -2242,6 +2247,8 @@ g_keys.assign(g_nVehicles, 0);
     g_vehicleReportSock[v] = s;
   }
 
+  StartRevocationSupport();
+
   // Data send sockets (per vehicle)
   g_dataSendSock.resize(g_nVehicles);
   for (uint32_t v = 0; v < g_nVehicles; v++)
@@ -2278,10 +2285,10 @@ g_keys.assign(g_nVehicles, 0);
 
   Simulator::Stop(Seconds(g_simTime));
   Simulator::Run();
-    PrintBcCacheStats();
-  PrintPrivacyStats();    PrintAuthStats();
-    PrintStaleStats();
-    PrintAuthStats();
+  PrintBcCacheStats();
+  PrintPrivacyStats();
+  PrintStaleStats();
+  PrintAuthStats();
   Simulator::Destroy();
 
   if (g_evt.is_open()) g_evt.close();
