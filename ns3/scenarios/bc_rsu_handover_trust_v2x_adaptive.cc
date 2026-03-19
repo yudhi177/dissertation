@@ -14,6 +14,9 @@
 #include <cmath>
 #include <numeric>
 #include <algorithm>
+#include <numeric>
+#include <set>
+#include <sstream>
 
 using namespace ns3;
 
@@ -42,6 +45,14 @@ static double g_delta = 0.10; // attack penalty
 /* --- Synthetic attack knobs (NEW) --- */
 static double g_attackProbPerTick = 0.15; // probability per tick that an attacker triggers a "bad" event
 static double g_maliciousFraction = 0.20; // % vehicles marked malicious
+static uint32_t g_seed = 1;
+
+/* --- Trust-gated handover knobs (NEW) --- */
+static double   g_trustFastThresh = 0.70;
+static double   g_trustMinThresh  = 0.30;
+static uint32_t g_fastAuthDelayMs = 20;
+static uint32_t g_fullAuthDelayMs = 120;
+static uint32_t g_handoverCheckMs = 200;
 
 /* =========================================================
    STATE
@@ -62,6 +73,11 @@ static std::vector<Vector> g_rsuPos;
 
 static uint64_t g_handoverCount = 0;
 static double   g_handoverDelaySum = 0.0;
+static uint64_t g_fastAuthCount = 0;
+static uint64_t g_fullAuthCount = 0;
+static uint64_t g_rejectCount = 0;
+static uint64_t g_malFast = 0, g_malFull = 0, g_malReject = 0;
+static uint64_t g_honFast = 0, g_honFull = 0, g_honReject = 0;
 
 static std::ofstream g_evt;
 
@@ -231,28 +247,23 @@ static void SyntheticTrafficTick()
 
 static void CommitBlock()
 {
-  // commit some portion of reports sent since last commit (simulate mining/consensus)
   g_blocks++;
   double lat = Simulator::Now().GetSeconds() - g_blockStart;
   g_blockLatencySum += lat;
 
-  // commit rate depends on mining delay / network health (simple model)
-  // here: commit up to 80% of outstanding (not tracked exactly), we just add a bounded amount
-  // simplest: commit 1 report per block if there exist any
+  uint64_t commitNow = 0;
   if (g_reportsCommitted < g_reportsSent)
   {
     uint64_t remaining = g_reportsSent - g_reportsCommitted;
-    uint64_t commitNow = std::min<uint64_t>(remaining, 3); // commit up to 3 per block
+    commitNow = std::min<uint64_t>(remaining, 3);
     g_reportsCommitted += commitNow;
-    LogEvent("BLOCK_COMMIT items=" + std::to_string(commitNow));
-  }
-  else
-  {
-    LogEvent("BLOCK_COMMIT items=0");
   }
 
-  g_blockStart = Simulator::Now().GetSeconds();
-  Simulator::Schedule(MilliSeconds(g_blockIntervalMs), &CommitBlock);
+  std::ostringstream oss;
+  oss << "BLOCK_COMMIT items=" << commitNow << " lat=" << lat;
+  LogEvent(oss.str());
+
+  Simulator::Schedule(MilliSeconds(g_blockIntervalMs), &StartBlockchain);
 }
 
 static void StartBlockchain()
@@ -265,7 +276,7 @@ static void StartBlockchain()
    HANDOVER LOGIC
 ========================================================= */
 
-static void FinishHandover(uint32_t v, int32_t target)
+static void FinishHandover(uint32_t v, int32_t target, bool fast, uint32_t authDelayMs)
 {
   g_vs[v].currentRsu = target;
   g_vs[v].authInProgress = false;
@@ -273,35 +284,83 @@ static void FinishHandover(uint32_t v, int32_t target)
   double delay = Simulator::Now().GetSeconds() - g_vs[v].hoStart;
   g_handoverDelaySum += delay;
 
-  LogEvent("HO_DONE v=" + std::to_string(v));
+  if (fast) g_fastAuthCount++;
+  else g_fullAuthCount++;
+
+  bool mal = g_vs[v].isMalicious;
+  if (fast) { if (mal) g_malFast++; else g_honFast++; }
+  else      { if (mal) g_malFull++; else g_honFull++; }
+
+  std::ostringstream oss;
+  oss << "HO_DONE v=" << v
+      << " to=" << target
+      << " mode=" << (fast ? "FAST" : "FULL")
+      << " authMs=" << authDelayMs
+      << " hoDelay=" << delay;
+  LogEvent(oss.str());
 }
 
 static void CheckHandover(Ptr<Node> veh)
 {
   uint32_t id = veh->GetId();
-  if (id >= g_nVehicles) return;
+  if (id >= g_nVehicles)
+  {
+    Simulator::Schedule(MilliSeconds(g_handoverCheckMs), &CheckHandover, veh);
+    return;
+  }
 
-  Vector pos = veh->GetObject<MobilityModel>()->GetPosition();
+  Ptr<MobilityModel> mm = veh->GetObject<MobilityModel>();
+  if (!mm)
+  {
+    Simulator::Schedule(MilliSeconds(g_handoverCheckMs), &CheckHandover, veh);
+    return;
+  }
 
+  Vector pos = mm->GetPosition();
   int32_t target = SelectServingRsu(pos);
   int32_t current = g_vs[id].currentRsu;
 
-  if (target != current && !g_vs[id].authInProgress)
+  if (target != -1 && target != current && !g_vs[id].authInProgress)
   {
-    g_handoverCount++;
-    g_hoCountVeh[id]++; // NEW: per-vehicle
+    const double trust = (id < g_adaptiveTrust.size()) ? g_adaptiveTrust[id] : 0.0;
 
-    g_vs[id].authInProgress = true;
-    g_vs[id].hoStart = Simulator::Now().GetSeconds();
+    if (trust < g_trustMinThresh)
+    {
+      g_rejectCount++;
+      if (g_vs[id].isMalicious) g_malReject++; else g_honReject++;
 
-    LogEvent("HO_START v=" + std::to_string(id));
+      std::ostringstream oss;
+      oss << "HO_REJECT v=" << id
+          << " from=" << current
+          << " to=" << target
+          << " trust=" << trust;
+      LogEvent(oss.str());
+    }
+    else
+    {
+      const bool fast = (trust >= g_trustFastThresh);
+      const uint32_t authDelayMs = fast ? g_fastAuthDelayMs : g_fullAuthDelayMs;
 
-    // you can later replace 20ms with FAST/FULL auth using trust
-    Simulator::Schedule(MilliSeconds(20),
-                        &FinishHandover, id, target);
+      g_handoverCount++;
+      g_hoCountVeh[id]++;
+
+      g_vs[id].authInProgress = true;
+      g_vs[id].hoStart = Simulator::Now().GetSeconds();
+
+      std::ostringstream oss;
+      oss << "HO_START v=" << id
+          << " from=" << current
+          << " to=" << target
+          << " trust=" << trust
+          << " mode=" << (fast ? "FAST" : "FULL");
+      LogEvent(oss.str());
+
+      Simulator::Schedule(MilliSeconds(authDelayMs),
+                          &FinishHandover, id, target, fast, authDelayMs);
+    }
   }
 
-  Simulator::Schedule(MilliSeconds(200),
+  Simulator::Schedule(MilliSeconds(g_handoverCheckMs),
                       &CheckHandover, veh);
 }
 
@@ -333,6 +392,14 @@ int main(int argc, char* argv[])
   // synthetic attack params
   cmd.AddValue("attackProbPerTick", "Prob of attack event per tick (malicious only)", g_attackProbPerTick);
   cmd.AddValue("maliciousFraction", "Fraction of malicious vehicles", g_maliciousFraction);
+  cmd.AddValue("seed", "Deterministic seed", g_seed);
+
+  // trust-gated handover params
+  cmd.AddValue("trustFastThresh", "Trust threshold for FAST auth", g_trustFastThresh);
+  cmd.AddValue("trustMinThresh", "Trust threshold below which handover is rejected", g_trustMinThresh);
+  cmd.AddValue("fastAuthDelayMs", "FAST auth delay ms", g_fastAuthDelayMs);
+  cmd.AddValue("fullAuthDelayMs", "FULL auth delay ms", g_fullAuthDelayMs);
+  cmd.AddValue("handoverCheckMs", "Handover check interval ms", g_handoverCheckMs);
 
   // ledger params
   cmd.AddValue("blockIntervalMs", "Block interval ms", g_blockIntervalMs);
@@ -340,7 +407,11 @@ int main(int argc, char* argv[])
 
   cmd.Parse(argc, argv);
 
-  g_evt.open(g_eventsOut);
+  SeedManager::SetSeed(g_seed);
+  SeedManager::SetRun(g_seed);
+  g_uv->SetStream(g_seed);
+
+  g_evt.open(g_eventsOut, std::ios::out | std::ios::trunc);
   g_evt << "time,event\n";
 
   NodeContainer vehicles;
@@ -376,28 +447,56 @@ int main(int argc, char* argv[])
   rsuMob.SetMobilityModel("ns3::ConstantPositionMobilityModel");
   rsuMob.Install(rsus);
 
-  /* ===== RSU PLACEMENT (GUARANTEED CROSSING) ===== */
+  /* ===== FALLBACK MOBILITY FOR ANY MISSING NODE ===== */
+  MobilityHelper fallback;
+  fallback.SetMobilityModel("ns3::ConstantPositionMobilityModel");
+  for (uint32_t i = 0; i < all.GetN(); ++i)
+  {
+    Ptr<Node> n = all.Get(i);
+    if (n->GetObject<MobilityModel>() == nullptr)
+    {
+      fallback.Install(n);
+      n->GetObject<MobilityModel>()->SetPosition(Vector(0.0, 0.0, 0.0));
+    }
+  }
+
+  /* ===== RSU PLACEMENT ===== */
   g_rsuPos.clear();
-  g_rsuPos.push_back(Vector(350.0, 0.0, 0.0));
-  g_rsuPos.push_back(Vector(550.0, 0.0, 0.0));
+  if (g_nRsu == 1)
+  {
+    g_rsuPos.push_back(Vector(450.0, 300.0, 0.0));
+  }
+  else
+  {
+    for (uint32_t r = 0; r < g_nRsu; ++r)
+    {
+      double x = 150.0 + (600.0 * double(r + 1) / double(g_nRsu + 1));
+      g_rsuPos.push_back(Vector(x, 300.0, 0.0));
+    }
+  }
 
-  rsus.Get(0)->GetObject<MobilityModel>()->SetPosition(g_rsuPos[0]);
-  rsus.Get(1)->GetObject<MobilityModel>()->SetPosition(g_rsuPos[1]);
-
-  NS_LOG_UNCOND("RSU0 at (350,0)");
-  NS_LOG_UNCOND("RSU1 at (550,0)");
+  for (uint32_t r = 0; r < g_nRsu; ++r)
+  {
+    rsus.Get(r)->GetObject<MobilityModel>()->SetPosition(g_rsuPos[r]);
+    NS_LOG_UNCOND("RSU" << r << " at (" << g_rsuPos[r].x << "," << g_rsuPos[r].y << ")");
+  }
 
   /* ===== INIT STATE ===== */
   g_vs.assign(g_nVehicles, VehicleState{});
 
   // pick malicious vehicles
   uint32_t mcount = (uint32_t)std::round(double(g_nVehicles) * g_maliciousFraction);
+  mcount = std::min<uint32_t>(mcount, g_nVehicles);
   for (uint32_t i = 0; i < g_nVehicles; i++) g_vs[i].isMalicious = false;
-  for (uint32_t k = 0; k < mcount; k++)
+
+  std::set<uint32_t> chosen;
+  while (chosen.size() < mcount)
   {
     uint32_t id = (uint32_t)g_uv->GetInteger(0, (int64_t)g_nVehicles - 1);
-    g_vs[id].isMalicious = true;
+    chosen.insert(id);
   }
+  for (uint32_t id : chosen)
+    g_vs[id].isMalicious = true;
 
   // init adaptive trust vectors
   g_txByVeh.assign(g_nVehicles, 0);
@@ -414,7 +513,7 @@ int main(int argc, char* argv[])
   /* ===== START PROCESSES ===== */
   for (uint32_t i = 0; i < g_nVehicles; i++)
   {
-    Simulator::Schedule(MilliSeconds(200),
+    Simulator::Schedule(MilliSeconds(g_handoverCheckMs),
                         &CheckHandover, vehicles.Get(i));
   }
 
@@ -429,11 +528,22 @@ int main(int argc, char* argv[])
 
   Simulator::Stop(Seconds(g_simTime));
   Simulator::Run();
+
+  NS_LOG_UNCOND("[ADAPT] handovers=" << g_handoverCount
+                 << " fast=" << g_fastAuthCount
+                 << " full=" << g_fullAuthCount
+                 << " reject=" << g_rejectCount);
+  NS_LOG_UNCOND("[BC] reportsSent=" << g_reportsSent
+                 << " reportsCommitted=" << g_reportsCommitted
+                 << " blocks=" << g_blocks);
+
   Simulator::Destroy();
 
   /* ===== WRITE CSV ===== */
-  std::ofstream f(g_csvOut);
-  f << "handoverCount,avgHandoverDelay,avgAdaptiveTrust,ledgerConsistency,reportsSent,reportsCommitted,blocks,avgBlockLatency\n";
+  std::ofstream f(g_csvOut, std::ios::out | std::ios::trunc);
+  f << "nVehicles,nRsu,simTime,rsuCoverageRadius,maliciousFraction,alpha,beta,gamma,delta,trustFastThresh,trustMinThresh,fastAuthDelayMs,fullAuthDelayMs,handoverCheckMs,";
+  f << "handoverCount,avgHandoverDelay,fastAuthCount,fullAuthCount,rejectCount,avgAdaptiveTrust,avgBehaviorTrust,avgMobilityStability,avgAttackPenalty,ledgerConsistency,reportsSent,reportsCommitted,blocks,avgBlockLatency,";
+  f << "malFast,malFull,malReject,honFast,honFull,honReject\n";
 
   double avgHo = (g_handoverCount > 0) ? (g_handoverDelaySum / double(g_handoverCount)) : 0.0;
 
@@ -442,15 +552,44 @@ int main(int argc, char* argv[])
     avgAT = std::accumulate(g_adaptiveTrust.begin(), g_adaptiveTrust.end(), 0.0) / g_adaptiveTrust.size();
 
   double avgBlkLat = (g_blocks > 0) ? (g_blockLatencySum / double(g_blocks)) : 0.0;
+  double avgBT = g_behaviorTrust.empty() ? 0.0 : (std::accumulate(g_behaviorTrust.begin(), g_behaviorTrust.end(), 0.0) / g_behaviorTrust.size());
+  double avgMS = g_mobilityStability.empty() ? 0.0 : (std::accumulate(g_mobilityStability.begin(), g_mobilityStability.end(), 0.0) / g_mobilityStability.size());
+  double avgAP = g_attackPenalty.empty() ? 0.0 : (std::accumulate(g_attackPenalty.begin(), g_attackPenalty.end(), 0.0) / g_attackPenalty.size());
 
-  f << g_handoverCount << ","
+  f << g_nVehicles << ","
+    << g_nRsu << ","
+    << g_simTime << ","
+    << g_rsuCoverageRadius << ","
+    << g_maliciousFraction << ","
+    << g_alpha << ","
+    << g_beta << ","
+    << g_gamma << ","
+    << g_delta << ","
+    << g_trustFastThresh << ","
+    << g_trustMinThresh << ","
+    << g_fastAuthDelayMs << ","
+    << g_fullAuthDelayMs << ","
+    << g_handoverCheckMs << ","
+    << g_handoverCount << ","
     << avgHo << ","
+    << g_fastAuthCount << ","
+    << g_fullAuthCount << ","
+    << g_rejectCount << ","
     << avgAT << ","
+    << avgBT << ","
+    << avgMS << ","
+    << avgAP << ","
     << g_ledgerConsistency << ","
     << g_reportsSent << ","
     << g_reportsCommitted << ","
     << g_blocks << ","
-    << avgBlkLat
+    << avgBlkLat << ","
+    << g_malFast << ","
+    << g_malFull << ","
+    << g_malReject << ","
+    << g_honFast << ","
+    << g_honFull << ","
+    << g_honReject
     << "\n";
 
   f.close();
