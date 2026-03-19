@@ -8,12 +8,15 @@
 #include <fstream>
 #include <limits>
 #include <string>
+#include <vector>
+#include <algorithm>
 
 using namespace ns3;
 
 struct HandoverEvent
 {
   double t;
+  uint32_t vehicleId;
   uint32_t from;
   uint32_t to;
   double trust;
@@ -21,12 +24,21 @@ struct HandoverEvent
   double delay_s;
 };
 
+struct VehicleState
+{
+  uint32_t currentRsu = 0;
+  bool inHandover = false;
+  Time handoverStart = Seconds(0.0);
+};
+
 static std::vector<HandoverEvent> g_events;
+static std::vector<VehicleState> g_vehicleStates;
+static std::vector<double> g_trustScores;
 
 static uint64_t g_handoverCount = 0;
+static uint64_t g_fastAuthCount = 0;
+static uint64_t g_fullAuthCount = 0;
 static double g_handoverDelaySum = 0.0;
-static bool g_inHandover = false;
-static Time g_handoverStart;
 
 static uint32_t FindNearestRsu(Ptr<Node> veh, const NodeContainer& rsus)
 {
@@ -47,78 +59,93 @@ static uint32_t FindNearestRsu(Ptr<Node> veh, const NodeContainer& rsus)
   return bestIdx;
 }
 
-static void TrustDecay(double* trustScore, double decayPerSec)
+static inline double Clamp01(double x)
 {
-  double now = Simulator::Now().GetSeconds();
-  (void)now;
+  return std::max(0.0, std::min(1.0, x));
+}
 
-  *trustScore -= decayPerSec; // called every 1s
-  if (*trustScore < 0.0) *trustScore = 0.0;
+static void TrustDecay(uint32_t vehId, double decayPerSec)
+{
+  if (vehId >= g_trustScores.size()) return;
 
-  Simulator::Schedule(Seconds(1.0), &TrustDecay, trustScore, decayPerSec);
+  g_trustScores[vehId] = Clamp01(g_trustScores[vehId] - decayPerSec); // called every 1s
+  Simulator::Schedule(Seconds(1.0), &TrustDecay, vehId, decayPerSec);
 }
 
 // Mock RSU feedback: every feedbackInterval seconds, trust += delta (or negative)
-static void RsuFeedback(double* trustScore, double delta, double feedbackInterval)
+static void RsuFeedback(uint32_t vehId, double delta, double feedbackInterval)
 {
-  *trustScore += delta;
-  if (*trustScore > 1.0) *trustScore = 1.0;
-  if (*trustScore < 0.0) *trustScore = 0.0;
+  if (vehId >= g_trustScores.size()) return;
 
-  Simulator::Schedule(Seconds(feedbackInterval), &RsuFeedback, trustScore, delta, feedbackInterval);
+  g_trustScores[vehId] = Clamp01(g_trustScores[vehId] + delta);
+  Simulator::Schedule(Seconds(feedbackInterval), &RsuFeedback, vehId, delta, feedbackInterval);
+}
+
+static void FinishHandover(uint32_t vehId, uint32_t oldIdx, uint32_t newIdx, bool isFast)
+{
+  if (vehId >= g_vehicleStates.size() || vehId >= g_trustScores.size()) return;
+
+  auto &vs = g_vehicleStates[vehId];
+  if (!vs.inHandover) return;
+
+  vs.inHandover = false;
+  vs.currentRsu = newIdx;
+
+  g_handoverCount++;
+  if (isFast) g_fastAuthCount++;
+  else g_fullAuthCount++;
+
+  double hd = (Simulator::Now() - vs.handoverStart).GetSeconds();
+  g_handoverDelaySum += hd;
+
+  HandoverEvent e;
+  e.t = Simulator::Now().GetSeconds();
+  e.vehicleId = vehId;
+  e.from = oldIdx;
+  e.to = newIdx;
+  e.trust = g_trustScores[vehId];
+  e.mode = (isFast ? "FAST" : "FULL");
+  e.delay_s = hd;
+  g_events.push_back(e);
+
+  std::cout << "Handover: veh" << vehId
+            << " RSU" << oldIdx << " -> RSU" << newIdx
+            << " trust=" << g_trustScores[vehId]
+            << " mode=" << e.mode
+            << " delay=" << hd << "s\n";
 }
 
 static void CheckHandover(Ptr<Node> veh,
                           const NodeContainer& rsus,
-                          uint32_t* currentRsuIdx,
+                          uint32_t vehId,
                           Time checkInterval,
-                          double* trustScore,
                           double trustThreshold,
                           Time fullAuthDelay,
                           Time fastAuthDelay)
 {
+  if (vehId >= g_vehicleStates.size() || vehId >= g_trustScores.size())
+  {
+    return;
+  }
+
+  auto &vs = g_vehicleStates[vehId];
   uint32_t newIdx = FindNearestRsu(veh, rsus);
 
-  if (newIdx != *currentRsuIdx)
+  if (newIdx != vs.currentRsu && !vs.inHandover)
   {
-    g_inHandover = true;
-    g_handoverStart = Simulator::Now();
+    vs.inHandover = true;
+    vs.handoverStart = Simulator::Now();
 
-    uint32_t oldIdx = *currentRsuIdx;
-    *currentRsuIdx = newIdx;
-
-    bool isFast = (*trustScore >= trustThreshold);
+    uint32_t oldIdx = vs.currentRsu;
+    bool isFast = (g_trustScores[vehId] >= trustThreshold);
     Time decisionDelay = isFast ? fastAuthDelay : fullAuthDelay;
 
-    Simulator::Schedule(decisionDelay, [oldIdx, newIdx, trustScore, trustThreshold, isFast]() {
-      if (g_inHandover)
-      {
-        g_inHandover = false;
-        g_handoverCount++;
-
-        double hd = (Simulator::Now() - g_handoverStart).GetSeconds();
-        g_handoverDelaySum += hd;
-
-        HandoverEvent e;
-        e.t = Simulator::Now().GetSeconds();
-        e.from = oldIdx;
-        e.to = newIdx;
-        e.trust = *trustScore;
-        e.mode = (isFast ? "FAST" : "FULL");
-        e.delay_s = hd;
-        g_events.push_back(e);
-
-        std::cout << "Handover: RSU" << oldIdx << " -> RSU" << newIdx
-                  << " trust=" << *trustScore
-                  << " mode=" << e.mode
-                  << " delay=" << hd << "s\n";
-      }
-    });
+    Simulator::Schedule(decisionDelay, &FinishHandover, vehId, oldIdx, newIdx, isFast);
   }
 
   Simulator::Schedule(checkInterval, &CheckHandover,
-                      veh, rsus, currentRsuIdx, checkInterval,
-                      trustScore, trustThreshold, fullAuthDelay, fastAuthDelay);
+                      veh, rsus, vehId, checkInterval,
+                      trustThreshold, fullAuthDelay, fastAuthDelay);
 }
 
 int main(int argc, char* argv[])
@@ -212,36 +239,47 @@ int main(int argc, char* argv[])
   ipv4.SetBase("10.3.0.0", "255.255.0.0");
   ipv4.Assign(devices);
 
-  // Track vehicle 0
-  uint32_t currentRsuIdx = FindNearestRsu(vehicles.Get(0), rsus);
-
-  double trustScore = initialTrust;
+  // Initialize per-vehicle state
+  g_vehicleStates.assign(nVehicles, VehicleState{});
+  g_trustScores.assign(nVehicles, Clamp01(initialTrust));
+  for (uint32_t v = 0; v < nVehicles; ++v)
+  {
+    g_vehicleStates[v].currentRsu = FindNearestRsu(vehicles.Get(v), rsus);
+  }
 
   Time checkInterval = MilliSeconds((uint64_t)checkMs);
   Time fullDelay = MilliSeconds((uint64_t)fullAuthMs);
   Time fastDelay = MilliSeconds((uint64_t)fastReauthMs);
 
-  // Start trust dynamics
-  Simulator::Schedule(Seconds(1.0), &TrustDecay, &trustScore, trustDecayPerSec);
-  Simulator::Schedule(Seconds(feedbackInterval), &RsuFeedback, &trustScore, feedbackDelta, feedbackInterval);
-
-  Simulator::Schedule(Seconds(1.0), &CheckHandover,
-                      vehicles.Get(0), rsus, &currentRsuIdx,
-                      checkInterval, &trustScore, trustThreshold,
-                      fullDelay, fastDelay);
+  // Start trust dynamics and handover tracking for every vehicle
+  for (uint32_t v = 0; v < nVehicles; ++v)
+  {
+    Simulator::Schedule(Seconds(1.0), &TrustDecay, v, trustDecayPerSec);
+    Simulator::Schedule(Seconds(feedbackInterval), &RsuFeedback, v, feedbackDelta, feedbackInterval);
+    Simulator::Schedule(Seconds(1.0 + 0.01 * v), &CheckHandover,
+                        vehicles.Get(v), rsus, v,
+                        checkInterval, trustThreshold,
+                        fullDelay, fastDelay);
+  }
 
   Simulator::Stop(Seconds(simTime));
   Simulator::Run();
 
-  double avgHandoverDelay = (g_handoverCount > 0) ? (g_handoverDelaySum / (double)g_handoverCount) : 0.0;
+  double avgHandoverDelay = (g_handoverCount > 0) ? (g_handoverDelaySum / static_cast<double>(g_handoverCount)) : 0.0;
+  double meanFinalTrust = 0.0;
+  if (!g_trustScores.empty())
+  {
+    for (double t : g_trustScores) meanFinalTrust += t;
+    meanFinalTrust /= static_cast<double>(g_trustScores.size());
+  }
 
   // Write events CSV
   {
     std::ofstream ev(eventsCsv, std::ios::out);
-    ev << "time_s,from_rsu,to_rsu,trust,mode,delay_s\n";
-    for (auto &e : g_events)
+    ev << "time_s,vehicle_id,from_rsu,to_rsu,trust,mode,delay_s\n";
+    for (const auto &e : g_events)
     {
-      ev << e.t << "," << e.from << "," << e.to << ","
+      ev << e.t << "," << e.vehicleId << "," << e.from << "," << e.to << ","
          << e.trust << "," << e.mode << "," << e.delay_s << "\n";
     }
   }
@@ -249,19 +287,23 @@ int main(int argc, char* argv[])
   // Write summary CSV
   {
     std::ofstream out(summaryCsv, std::ios::out);
-    out << "nVehicles,simTime,rsuSeparation,vehicleSpeed,checkMs,fullAuthMs,fastReauthMs,initialTrust,trustThreshold,trustDecayPerSec,feedbackInterval,feedbackDelta,"
-           "handoverCount,avgHandoverDelay_s\n";
+    out << "nVehicles,simTime,rsuSeparation,vehicleSpeed,checkMs,fullAuthMs,fastReauthMs,initialTrust,trustThreshold,trustDecayPerSec,feedbackInterval,feedbackDelta," \
+           "handoverCount,fastAuthCount,fullAuthCount,avgHandoverDelay_s,meanFinalTrust\n";
     out << nVehicles << "," << simTime << "," << rsuSeparation << "," << vehicleSpeed << ","
         << checkMs << "," << fullAuthMs << "," << fastReauthMs << ","
         << initialTrust << "," << trustThreshold << ","
         << trustDecayPerSec << "," << feedbackInterval << "," << feedbackDelta << ","
-        << g_handoverCount << "," << avgHandoverDelay << "\n";
+        << g_handoverCount << "," << g_fastAuthCount << "," << g_fullAuthCount << ","
+        << avgHandoverDelay << "," << meanFinalTrust << "\n";
   }
 
   std::cout << "Saved summary: " << summaryCsv << "\n";
   std::cout << "Saved events : " << eventsCsv << "\n";
   std::cout << "HandoverCount=" << g_handoverCount
-            << " AvgHandoverDelay=" << avgHandoverDelay << "s\n";
+            << " FastAuthCount=" << g_fastAuthCount
+            << " FullAuthCount=" << g_fullAuthCount
+            << " AvgHandoverDelay=" << avgHandoverDelay << "s"
+            << " MeanFinalTrust=" << meanFinalTrust << "\n";
 
   Simulator::Destroy();
   return 0;
