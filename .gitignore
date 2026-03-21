@@ -144,3 +144,7 @@ cmake-cache/
 # Large generated outputs (adjust based on what you want to keep)
 ns3/results/**/runs/
 ns3/results/**/tmp/
+
+# local-only
+scyther/
+form
