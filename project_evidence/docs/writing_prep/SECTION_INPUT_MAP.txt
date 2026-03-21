@@ -1,0 +1,75 @@
+Section Input Map
+=================
+
+Abstract
+--------
+Use:
+- project_evidence/docs/writing_prep/FINAL_CONTRIBUTIONS.txt
+- project_evidence/docs/writing_prep/LIMITATIONS_AND_SAFE_CLAIMS.txt
+- project_evidence/docs/related_work/NOVELTY_POSITIONING_PACK.txt
+- project_evidence/docs/tables/MASTER_SUMMARY_TABLE.csv
+
+Introduction / Motivation
+-------------------------
+Use:
+- project_evidence/docs/security/THREAT_MODEL.txt
+- project_evidence/docs/security/BLOCKCHAIN_DATA_MODEL_AND_HASH_SHARING.txt
+- project_evidence/docs/security/TRUST_FRESHNESS_AND_STALENESS.txt
+- project_evidence/docs/related_work/NOVELTY_POSITIONING_PACK.txt
+
+Related Work
+------------
+Use:
+- project_evidence/docs/related_work/PRIOR_WORK_COMPARISON_TEMPLATE.csv
+- project_evidence/docs/related_work/RELATED_WORK_BUCKETS.txt
+
+System Model / Threat Model
+---------------------------
+Use:
+- project_evidence/docs/security/THREAT_MODEL.txt
+- project_evidence/docs/security/ATTACK_IMPLEMENTATION_MATRIX.csv
+- project_evidence/docs/security/SECURITY_POSITIONING_SUMMARY.txt
+
+Framework / Method
+------------------
+Use:
+- project_evidence/docs/security/AUTHENTICATION_FLOW.txt
+- project_evidence/docs/security/HANDOVER_DECISION_RULES.txt
+- project_evidence/docs/security/BLOCKCHAIN_DATA_MODEL_AND_HASH_SHARING.txt
+- project_evidence/docs/security/TRUST_FRESHNESS_AND_STALENESS.txt
+- project_evidence/docs/algorithms/RECEIVE_VALIDATE_ALGORITHM.txt
+- project_evidence/docs/algorithms/HANDOVER_DECISION_ALGORITHM.txt
+
+Formal Analysis
+---------------
+Use:
+- project_evidence/docs/security/FORMAL_ANALYSIS_BOUNDARY.txt
+- project_evidence/formal/v2x_handover_auth.spdl
+- project_evidence/formal/v2x_handover_auth_secure.spdl
+- project_evidence/formal/v2x_handover_auth_final.spdl
+- project_evidence/formal/v2x_handover_auth_result.txt
+- project_evidence/formal/v2x_handover_auth_secure_result.txt
+- project_evidence/formal/v2x_handover_auth_final_result.txt
+
+Results
+-------
+Use:
+- project_evidence/docs/CLAIM_TO_EVIDENCE.csv
+- project_evidence/docs/tables/MASTER_SUMMARY_TABLE.csv
+- project_evidence/docs/tables/FORMAL_VERIFICATION_SUMMARY.csv
+- project_evidence/docs/tables/INTEGRATED_SCENARIO_TABLE.csv
+
+Limitations
+-----------
+Use:
+- project_evidence/docs/writing_prep/LIMITATIONS_AND_SAFE_CLAIMS.txt
+- project_evidence/docs/security/FORMAL_ANALYSIS_BOUNDARY.txt
+- project_evidence/docs/security/SAFE_SECURITY_CLAIMS.txt
+
+Reproducibility
+---------------
+Use:
+- project_evidence/docs/REPRODUCIBILITY_README.txt
+- project_evidence/docs/RUN_ORDER.txt
+- project_evidence/CHECKSUMS.txt
+- project_evidence/EVIDENCE_MANIFEST.csv

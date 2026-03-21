@@ -1,0 +1,8 @@
+table_id,table_name,purpose,primary_source,status
+T1,Framework module summary,Show major framework layers and their roles,project_evidence/docs/security/SECURITY_POSITIONING_SUMMARY.txt,planned
+T2,Threat model and attacker capability summary,Show attacker scope capabilities and boundaries,project_evidence/docs/security/THREAT_MODEL.txt,planned
+T3,Simulation and scenario parameter summary,Show key experiment knobs and environment assumptions,project_evidence/EVIDENCE_MANIFEST.csv,planned
+T4,Baselines and ablations summary,Show evaluation comparison modes and disabled-feature variants,project_evidence/docs/results/CLAIM_METRIC_ALIGNMENT.csv,planned
+T5,Key result summary,Show major scenario-to-metric mapping for final paper,project_evidence/docs/tables/MASTER_SUMMARY_TABLE.csv,planned
+T6,Formal verification summary,Show model progression and final formal boundary,project_evidence/docs/tables/FORMAL_VERIFICATION_SUMMARY.csv,planned
+T7,Prior-work comparison table,Show how this project differs from closely related studies,to_be_built_from_literature_matrix,planned

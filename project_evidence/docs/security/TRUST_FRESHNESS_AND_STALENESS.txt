@@ -1,0 +1,117 @@
+Trust Freshness and Staleness
+=============================
+
+Purpose
+-------
+This note explains how trust age affects decision quality in the framework
+and why freshness checking is necessary for safe handover.
+
+Why Freshness Matters
+---------------------
+A trust score is not equally reliable forever.
+
+A previously trusted vehicle may:
+- change behavior
+- move into a different context
+- accumulate new reports
+- become less reliable over time
+
+For this reason, the framework must consider not only trust value,
+but also trust age.
+
+Core Idea
+---------
+The system treats trust as a pair:
+
+- trust score
+- freshness state
+
+This means that a high trust value is useful only when it is also
+sufficiently recent.
+
+Fresh Trust
+-----------
+Trust is considered fresh when:
+- it was updated recently
+- it falls within the allowed freshness window
+- it reflects recent behavior closely enough for handover use
+
+Fresh trust supports:
+- faster decision making
+- safer FAST authentication eligibility
+- reduced need for full re-validation
+
+Stale Trust
+-----------
+Trust is considered stale when:
+- it is older than the allowed freshness window
+- it may no longer reflect current behavior reliably
+
+Stale trust should not be treated the same as recent trust.
+
+Operational consequence:
+- stale trust should move the system away from FAST
+- stale trust should trigger stronger checking
+- stale trust may require FULL authentication before acceptance
+
+Expired or Unsafe Trust
+-----------------------
+If trust is both:
+- too old
+and/or
+- below the minimum trust threshold
+
+then the system should deny low-confidence continuation and move toward:
+- FULL re-authentication
+or
+- REJECT, depending on trust level
+
+Interaction with Handover Logic
+-------------------------------
+Trust freshness directly affects the FAST / FULL / REJECT decision.
+
+Typical interpretation:
+- high trust + fresh state -> FAST
+- moderate trust or stale state -> FULL
+- low trust -> REJECT
+
+So freshness acts as a safety control that prevents the framework from
+using outdated trust too aggressively.
+
+Interaction with Blockchain-Assisted Continuity
+-----------------------------------------------
+The blockchain-assisted layer can help retrieve prior trust context,
+but retrieved trust must still be freshness-checked.
+
+This means:
+- blockchain continuity does not remove freshness requirements
+- cached or retrieved trust must still be age-aware
+- continuity support is useful only when combined with freshness logic
+
+Why This Helps Security
+-----------------------
+Freshness checking improves security because it reduces the chance that:
+- old trust is reused blindly
+- outdated reputation enables unsafe FAST decisions
+- previous good behavior permanently masks new malicious behavior
+
+Why This Helps System Design
+----------------------------
+Freshness checking also improves design credibility because it shows that
+the framework does not treat trust as a static permanent label.
+
+Instead, trust is:
+- dynamic
+- time-sensitive
+- revalidated when needed
+
+Safe Paper Wording
+------------------
+The framework uses freshness-aware trust evaluation so that handover
+decisions depend not only on trust score, but also on whether the trust
+information is sufficiently recent for safe FAST authentication.
+
+Additional safe wording:
+Outdated trust information is not treated as equivalent to fresh trust;
+stale trust triggers stronger verification through the FULL path when
+required.

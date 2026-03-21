@@ -1,0 +1,107 @@
+Blockchain-Assisted Trust Lookup Algorithm
+==========================================
+
+Purpose
+-------
+This algorithm summarizes how the framework uses blockchain-assisted trust
+continuity and cache support during handover-related trust retrieval.
+
+Goal
+----
+To reduce dependence on only local trust state and to support continuity of
+trust decisions across RSU regions with manageable lookup overhead.
+
+Inputs
+------
+- vehicle identifier or pseudonym-linked reference
+- local trust state
+- cache state
+- blockchain-assisted trust record path
+- freshness information
+- handover request context
+
+Outputs
+-------
+- usable trust context
+or
+- stale / missing trust context requiring stronger revalidation
+
+Algorithm
+---------
+Step 1:
+A vehicle approaches a new RSU or handover point.
+
+Step 2:
+Check whether usable local trust state already exists.
+
+If recent local trust is available:
+- use local trust state
+- continue to freshness validation
+
+Else:
+- continue to continuity lookup stage
+
+Step 3:
+Check cache for previously retrieved trust continuity data.
+
+If cache hit occurs and cached record is still fresh:
+- use cached trust context
+- avoid full remote lookup
+- record cache hit
+
+Else:
+- continue to blockchain-assisted lookup
+- record cache miss
+
+Step 4:
+Query blockchain-assisted continuity layer for compact trust record.
+
+The retrieved record may include:
+- trust summary
+- timestamp or freshness marker
+- compact integrity-protected metadata
+- status information relevant to handover
+
+Step 5:
+Validate usability of retrieved trust context.
+
+If record exists and freshness is acceptable:
+- load trust context
+- optionally refresh cache
+
+Else:
+- mark trust as stale or insufficient
+
+Step 6:
+Pass resulting trust context to handover decision logic.
+
+Possible effect:
+- FAST if trust is high and fresh
+- FULL if trust is moderate or stale
+- REJECT if trust is too low
+
+Interpretation
+--------------
+The blockchain-assisted layer is not used as a full transaction-heavy system.
+
+Its operational role is:
+- continuity support
+- compact trust retrieval
+- cache-assisted reduction of repeated lookup overhead
+
+Why This Matters
+----------------
+This lookup path helps the framework avoid relying only on local trust
+knowledge at each RSU.
+
+It improves trust continuity while still allowing:
+- freshness control
+- cache optimization
+- stronger revalidation when trust is stale
+
+Safe Paper Wording
+------------------
+During handover, the framework may use blockchain-assisted trust continuity
+records, together with cache support, to retrieve compact trust context for
+FAST, FULL, or REJECT decisions without claiming a full production blockchain
+design.

@@ -1,0 +1,45 @@
+Primary and Supporting Scenarios
+================================
+
+Purpose
+-------
+This note clarifies which scenarios are primary and which are supporting.
+
+Primary Scenario
+----------------
+The integrated secure trust-based V2X scenario is the primary implementation
+story because it combines:
+- communication
+- packet validation
+- trust
+- handover control
+- blockchain-assisted continuity
+- privacy-aware behavior where enabled
+
+Supporting Scenarios
+--------------------
+Supporting scenarios are used to isolate evidence:
+
+1. Baseline
+- used for basic communication reference
+
+2. Secure
+- used for replay / invalid packet filtering evidence
+
+3. Handover
+- used for FAST / FULL / REJECT behavior and handover delay evidence
+
+4. Adaptive / Blockchain
+- used for trust continuity and ledger-related evidence
+
+Role in Writing
+---------------
+When writing the paper:
+- present the integrated scenario as the full framework view
+- use supporting scenarios as focused evidence slices
+- do not let supporting scenarios contradict the integrated story
+
+Safe Interpretation
+-------------------
+The framework should be described as one integrated design evaluated through
+both focused supporting scenarios and final integrated scenarios.

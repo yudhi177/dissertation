@@ -1,0 +1,108 @@
+Handover Decision Algorithm
+===========================
+
+Purpose
+-------
+This algorithm summarizes how the framework selects FAST, FULL, or REJECT
+during RSU handover.
+
+Goal
+----
+To balance low latency and safe control by using trust score and trust
+freshness during mobility.
+
+Inputs
+------
+- trust score T
+- trust freshness state F
+- high trust threshold T_high
+- low trust threshold T_low
+- freshness limit F_limit
+- available continuity information (local or blockchain-assisted)
+
+Outputs
+-------
+- FAST
+or
+- FULL
+or
+- REJECT
+
+Algorithm
+---------
+Step 1:
+When a vehicle approaches a new RSU region, retrieve the available trust
+context.
+
+Possible sources:
+- local trust state
+- cached continuity information
+- blockchain-assisted continuity lookup
+
+Step 2:
+Evaluate freshness of the trust context.
+
+If trust age is greater than F_limit:
+- mark trust as stale
+
+Else:
+- mark trust as fresh
+
+Step 3:
+Compare trust score against thresholds.
+
+Case A:
+If T >= T_high and trust is fresh:
+- select FAST authentication
+
+Case B:
+If T_low <= T < T_high:
+- select FULL authentication
+
+Case C:
+If trust is stale, even when trust value is otherwise usable:
+- prefer FULL authentication for re-validation
+
+Case D:
+If T < T_low:
+- select REJECT
+
+Step 4:
+Execute the selected handover action.
+
+FAST:
+- low-delay continuation
+
+FULL:
+- stronger re-authentication path
+
+REJECT:
+- deny acceptance
+
+Interpretation
+--------------
+FAST is used only when both:
+- trust is high
+- trust is recent
+
+FULL is used when:
+- trust is moderate
+- or trust is stale and must be revalidated
+
+REJECT is used when:
+- trust is too low for safe acceptance
+
+Why This Matters
+----------------
+This rule turns trust into an operational control decision.
+
+Instead of using one fixed handover method for all vehicles, the framework
+adapts authentication strength according to:
+- trust level
+- freshness
+- mobility conditions
+
+Safe Paper Wording
+------------------
+During RSU transition, the framework evaluates trust score and trust
+freshness to dynamically select FAST, FULL, or REJECT handover behavior.

@@ -1,0 +1,37 @@
+Final Contributions
+===================
+
+The paper should present exactly the following five contributions.
+
+1. Integrated secure V2X framework
+----------------------------------
+An implementation-backed ns-3 framework is developed for secure trust-based
+V2X communication that combines packet validation, trust-guided control,
+RSU handover support, blockchain-assisted trust continuity, and optional
+privacy-aware operation.
+
+2. Two-layer authentication handling
+------------------------------------
+The framework distinguishes between message-level validation for replay and
+invalid-packet filtering, and handover-time authentication control using
+FAST, FULL, and REJECT decisions driven by trust score and trust freshness.
+
+3. Trust continuity with blockchain-assisted support
+----------------------------------------------------
+A compact blockchain-assisted continuity layer is used to preserve and query
+trust-related state across RSUs, with cache-aware behavior to reduce lookup
+overhead during mobility-sensitive handover.
+
+4. Security and mobility evaluation under simulated attacks
+-----------------------------------------------------------
+The implementation is evaluated under replay, tampered or invalid-packet,
+malicious-behavior, stale-trust, and continuity-overhead stress conditions
+to study their effect on communication quality, trust behavior, and handover
+performance.
+
+5. Formal analysis boundary for handover authentication
+-------------------------------------------------------
+The handover authentication subprotocol is formally modeled in Scyther, and
+the final protocol variant satisfies the intended secrecy, aliveness, weak
+agreement, non-injective agreement, and synchronization claims within the
+tool's analysis bounds.

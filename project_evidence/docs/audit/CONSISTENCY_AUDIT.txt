@@ -1,0 +1,27 @@
+Final Consistency Audit
+=======================
+
+Audit Scope
+-----------
+This audit checks whether the prepared evidence bundle is internally
+consistent in terms of file presence, category mapping, duplication,
+and basic documentation coverage.
+
+Checks
+------
+[ ] Required categorized folders exist
+[ ] Required key evidence files exist
+[ ] Formal verification files exist
+[ ] Documentation files exist
+[ ] Table files exist
+[ ] Manifest exists
+[ ] Checksum file exists
+[ ] Duplicate archival copies in integrated/ are acceptable
+[ ] Evidence bundle is ready for packaging after audit
+
+Notes
+-----
+- Duplicates in integrated/ are expected because it preserves the final
+  mixed paper_evidence collection.
+- Canonical evidence should be taken from categorized folders:
+  baseline/, secure/, handover/, adaptive/, formal/

@@ -1,0 +1,27 @@
+Absolute Last Pre-Paper Checklist
+=================================
+
+These are the final practical tasks before manuscript drafting.
+
+Manual Task 1
+-------------
+Fill the prior-work comparison template using the finalized paper set.
+
+Manual Task 2
+-------------
+Redraw and export the final publication-ready diagrams.
+
+Manual Task 3
+-------------
+Capture the curated implementation and terminal screenshots listed in the
+screenshot capture log.
+
+After These Three
+-----------------
+Start manuscript drafting using:
+- terminology consistency sheet
+- final five contributions
+- limitations and safe claims
+- section input map
+- master summary table
+- formal verification summary

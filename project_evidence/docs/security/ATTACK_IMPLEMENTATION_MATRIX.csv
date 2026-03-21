@@ -1,0 +1,8 @@
+attack_id,attack_name,implemented_in_project,code_or_module_scope,parameter_or_trigger,expected_effect,primary_metrics,defense_path
+A1,Replay attack,Yes,secure/integrated receive path,replay enable flag or replay mode,replayed packets accepted without defense if cache absent,replayDrops pdr avgDelay,Replay cache / replay check
+A2,Tampered or invalid-signature packet,Yes,secure/integrated validation path,signature check / attack mode,invalid packets disturb delivery and trust,sigDrops pdr throughput,Signature validation / packet drop
+A3,Malicious participant behavior,Yes,trust / adaptive / integrated scenarios,maliciousRate attackMode,trust degradation and worse decisions,avgAdaptiveTrust ledgerConsistency reports,Trust engine and thresholds
+A4,Unsafe handover pressure,Yes,handover / integrated logic,trust thresholds freshness and mobility,forces FULL or REJECT instead of FAST,handoverCount avgHandoverDelay fastAuthCount fullAuthCount rejectCount,FAST/FULL/REJECT gate
+A5,Stale trust exploitation,Partially,integrated trust freshness logic,stale age / freshness window,old trust may cause poor decision quality,staleChecks staleMismatch mismatchRate,Freshness validation / re-auth path
+A6,Blockchain query overhead stress,Yes,integrated blockchain/cache path,cache on/off always-query behavior,higher lookup overhead and lower responsiveness,bc queries cache hit rate avgBlockLatency avgLedgerTrust,Cache-assisted lookup
+A7,Privacy linkability pressure,Yes,privacy module,pseudonym rotation cadence,observer may link identities across time,rotations linkAttempts linkSuccess linkSuccessRate,Periodic pseudonym rotation

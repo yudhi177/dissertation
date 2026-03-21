@@ -1,0 +1,2 @@
+handoverCount,avgHandoverDelay,avgAdaptiveTrust,ledgerConsistency,reportsSent,reportsCommitted,blocks,avgBlockLatency
+0,0,0.797487,0.742857,72,55,20,0.9525

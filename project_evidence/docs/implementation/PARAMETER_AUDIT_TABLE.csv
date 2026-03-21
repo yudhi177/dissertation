@@ -1,0 +1,21 @@
+parameter_group,parameter_name,purpose,main_effect_on_system,main_scenario_families
+Network,node density,Controls contention and communication load,Affects pdr delay throughput,Baseline; Secure; Integrated
+Network,RSU count or coverage,Controls infrastructure availability,Affects handover frequency and trust continuity,Handover; Integrated
+Mobility,vehicle speed,Controls mobility stress,Affects handover count and delay,Handover; Integrated
+Traffic,packet interval,Controls transmission load,Affects congestion and delivery metrics,Baseline; Secure; Integrated
+Traffic,payload size,Controls packet size,Affects throughput and delay,Baseline; Secure; Integrated
+Security,malicious rate,Controls fraction of malicious participants,Affects trust quality drops and control safety,Adaptive; Integrated
+Security,replay enable or replay mode,Turns replay attack behavior on or off,Affects replayDrops and secure delivery,Secure; Integrated
+Security,invalid or tamper mode,Injects malformed or invalid packets,Affects sigDrops pdr and trust,Secure; Integrated
+Trust,high trust threshold T_high,Defines FAST eligibility boundary,Affects FAST usage and latency,Handover; Integrated
+Trust,low trust threshold T_low,Defines minimum acceptable trust,Affects FULL versus REJECT decisions,Handover; Integrated
+Trust,freshness limit F_limit,Defines maximum trust age,Affects stale trust handling,Handover; Integrated
+Handover,FAST authentication delay,Represents lightweight handover path,Affects avg handover delay,Handover; Integrated
+Handover,FULL authentication delay,Represents stronger revalidation path,Affects avg handover delay,Handover; Integrated
+Blockchain,cache enabled flag,Controls whether local cache is used,Affects lookup overhead and responsiveness,Adaptive; Integrated
+Blockchain,always query behavior,Forces repeated continuity lookup,Affects avgBlockLatency and cache value,Adaptive; Integrated
+Blockchain,report commit frequency,Controls trust report persistence rate,Affects reportsCommitted blocks and latency,Adaptive; Integrated
+Blockchain,ledger latency abstraction,Represents continuity lookup or commit cost,Affects end to end delay and trust freshness,Adaptive; Integrated
+Privacy,pseudonym rotation cadence,Controls how often identifiers rotate,Affects linkability and continuity cost,Integrated privacy scenario
+Experiment,random seed,Controls run randomness,Affects repeatability,All scenario families
+Experiment,number of runs,Controls statistical stability,Affects confidence in reported averages,All scenario families

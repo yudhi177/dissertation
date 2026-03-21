@@ -1,0 +1,11 @@
+screenshot_id,file_name_or_terminal,source_area,purpose,status,notes
+S1,secure_trust_blockchain_v2x.cc,receive path,show packet receive and classification block,planned,
+S2,secure_trust_blockchain_v2x.cc,replay defense,show replay filtering logic,planned,
+S3,secure_trust_blockchain_v2x.cc,validation path,show invalid or tampered packet rejection,planned,
+S4,secure_trust_blockchain_v2x.cc,trust logic,show trust update logic,planned,
+S5,secure_trust_blockchain_v2x.cc,handover logic,show FAST FULL REJECT decision block,planned,
+S6,secure_trust_blockchain_v2x.cc,blockchain path,show query commit and cache logic,planned,
+S7,secure_trust_blockchain_v2x.cc,privacy path,show pseudonym rotation logic if used,planned,
+S8,secure_trust_blockchain_v2x.cc,logging path,show metrics and CSV output block,planned,
+S9,terminal,formal verification,show final Scyther verification result,planned,
+S10,terminal,evidence bundle,show final release bundle listing,planned,

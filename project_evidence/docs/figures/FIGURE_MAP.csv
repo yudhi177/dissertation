@@ -1,0 +1,13 @@
+figure_id,figure_name,figure_type,purpose,primary_source,status
+F1,Overall system architecture,block_diagram,Show vehicles RSUs security trust handover blockchain privacy modules,project_evidence/docs/security/SECURITY_POSITIONING_SUMMARY.txt,planned
+F2,Threat model and attack surface,threat_model_diagram,Show attacker capabilities and scope boundary,project_evidence/docs/security/THREAT_MODEL.txt,planned
+F3,Message-level authentication flow,flowchart,Show receive replay-check validation accept-drop path,project_evidence/docs/security/AUTHENTICATION_FLOW.txt,planned
+F4,FAST FULL REJECT handover logic,flowchart,Show trust-threshold-based handover decision path,project_evidence/docs/security/HANDOVER_DECISION_RULES.txt,planned
+F5,Trust freshness and staleness workflow,flowchart,Show freshness role in safe handover decisions,project_evidence/docs/security/TRUST_FRESHNESS_AND_STALENESS.txt,planned
+F6,Blockchain-assisted trust continuity workflow,workflow_diagram,Show compact record lookup cache and continuity support,project_evidence/docs/security/BLOCKCHAIN_DATA_MODEL_AND_HASH_SHARING.txt,planned
+F7,Handover authentication subprotocol,sequence_diagram,Show modeled formal handover-authentication exchange,project_evidence/formal/v2x_handover_auth_final.spdl,planned
+F8,Baseline to secure result comparison,result_figure,Show baseline versus secure communication behavior,project_evidence/baseline/urban_default.csv,planned
+F9,Handover performance figure,result_figure,Show handover summary and event behavior,project_evidence/handover/handover_meaningful.csv,planned
+F10,Adaptive and blockchain continuity figure,result_figure,Show adaptive trust and blockchain-assisted continuity behavior,project_evidence/adaptive/adaptive_default.csv,planned
+F11,Integrated cache-enabled figure,result_figure,Show integrated blockchain cache behavior,project_evidence/integrated/final_bc_cache_on.csv,planned
+F12,Integrated privacy-aware figure,result_figure,Show privacy-aware integrated behavior,project_evidence/integrated/final_privacy_meaningful.csv,planned

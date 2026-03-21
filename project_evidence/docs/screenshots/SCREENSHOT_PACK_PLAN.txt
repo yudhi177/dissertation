@@ -1,0 +1,44 @@
+Screenshot Pack Plan
+====================
+
+Purpose
+-------
+This note defines the screenshot categories that may be used in the paper,
+appendix, viva material, or implementation evidence pack.
+
+Allowed Screenshot Types
+------------------------
+1. Important code screenshots
+2. Terminal evidence screenshots
+3. Result-folder evidence screenshots
+4. Formal-analysis command/output screenshots
+5. Curated figure-generation or evidence-structure screenshots if needed
+
+Screenshot Principles
+---------------------
+- only use curated screenshots
+- avoid noisy full-screen captures
+- capture only the relevant block
+- include short readable code regions
+- keep text large enough to read
+- do not use screenshots where a clean table or diagram is better
+- use screenshots mainly for implementation evidence, appendix, or viva support
+
+Preferred Usage
+---------------
+Main paper:
+- minimal screenshot usage
+- only if a venue allows and if it improves clarity
+
+Appendix / viva / thesis evidence:
+- implementation code blocks
+- terminal outputs
+- reproducibility structure
+- formal verification outputs
+
+Do Not Use
+----------
+- random long terminal scrolls
+- blurry full-editor screenshots
+- screenshots of entire folders when a table is better
+- screenshots as a replacement for diagrams

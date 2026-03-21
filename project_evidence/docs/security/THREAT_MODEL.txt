@@ -1,0 +1,63 @@
+Threat Model
+============
+
+System Context
+--------------
+The project studies secure trust-based V2X communication with RSU-assisted
+handover, blockchain-supported trust continuity, and optional privacy support
+in an ns-3 based simulation environment.
+
+Adversary Model
+---------------
+The adversary is modeled as a constrained active network attacker inside the
+simulation environment.
+
+The attacker may:
+- replay previously observed packets
+- inject malformed or tampered packets
+- attempt signature-invalid message delivery
+- behave as a malicious participant affecting trust updates
+- trigger trust degradation and unsafe handover conditions
+- exploit stale trust information if freshness checks are weak
+
+The attacker does not claim:
+- full compromise of all infrastructure
+- full cryptographic primitive break
+- full real-world radio jamming proof
+- full anonymity de-anonymization proof
+- universal global Dolev-Yao control over every system layer
+
+Attacker Capabilities Implemented in This Project
+-------------------------------------------------
+1. Replay attack behavior
+2. Tampered / invalid-signature style packet injection
+3. Malicious behavior affecting trust outcomes
+4. Stress on handover decisions under trust degradation
+5. Optional interaction with blockchain-backed trust lookup path
+
+Security Goals
+--------------
+- message authenticity and integrity filtering
+- replay resistance at packet processing level
+- trust-guided safe RSU handover selection
+- trust continuity support across RSUs
+- bounded-overhead blockchain-assisted trust lookup
+- privacy-aware operation through pseudonym rotation
+- improved resilience under malicious participation
+
+Non-Goals / Explicit Boundaries
+-------------------------------
+This project does not claim:
+- full production blockchain deployment
+- full cryptographic benchmark realism unless separately measured
+- full protocol-suite formal proof
+- CK / eCK proof claim
+- full Dolev-Yao proof claim
+- formal anonymity proof
+
+Safe Positioning
+----------------
+The project should be presented as:
+an implementation-backed simulation study of secure trust-based V2X
+communication with blockchain-assisted trust continuity and privacy-aware
+operation, evaluated under a constrained active attacker model.

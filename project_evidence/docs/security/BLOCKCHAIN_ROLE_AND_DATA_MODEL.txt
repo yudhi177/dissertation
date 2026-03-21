@@ -1,0 +1,115 @@
+Blockchain Role and Data Model
+==============================
+
+Purpose
+-------
+This document explains why blockchain support is used in the project and
+what kind of information it is intended to carry.
+
+Why Blockchain Is Used Here
+---------------------------
+In this project, blockchain support is not introduced as a generic trend
+or as a replacement for all local trust logic.
+
+Its role is narrower and more practical:
+
+- support trust continuity across RSU regions
+- preserve a tamper-evident record of trust-related updates
+- reduce dependence on only local RSU memory
+- assist handover decisions when prior trust context is needed
+
+This means the blockchain layer supports continuity and consistency of
+trust information, especially during mobility and RSU transition.
+
+What Blockchain Is NOT Claiming
+-------------------------------
+The project does not claim:
+
+- a full production blockchain deployment
+- full cryptocurrency-style consensus realism
+- a complete replacement of local trust evaluation
+- a formal proof of the blockchain subsystem
+
+The blockchain layer is therefore best presented as a support mechanism
+for trust continuity, not as a universal security solution.
+
+What Kind of Data Is Represented
+--------------------------------
+The project should describe blockchain-carried information as compact
+trust-related state rather than raw application payloads.
+
+Typical stored or shared information may be described as:
+
+- node or pseudonym-related identifier reference
+- trust summary / trust score state
+- timestamp or recency marker
+- report / update record
+- compact state used for later query by another RSU
+- cacheable trust lookup result
+
+Safe Technical Wording
+----------------------
+The paper should describe the blockchain content as a trust-state
+abstraction or compact trust record.
+
+Avoid saying that full raw traffic payloads are stored on chain.
+
+A safer description is:
+
+"The blockchain-assisted layer stores compact trust-related state used
+for continuity, lookup, and consistency support across RSUs."
+
+Why This Helps Handover
+-----------------------
+Without continuity support, a newly encountered RSU may depend only on
+fresh local observation.
+
+That can cause:
+
+- repeated trust re-learning
+- slower handover decisions
+- less efficient FAST authentication opportunities
+- higher dependence on full re-validation
+
+With blockchain-assisted continuity, a receiving RSU can query a compact
+trust-related state and combine it with freshness checks and local logic.
+
+This helps support:
+
+- faster trust retrieval
+- improved continuity across RSUs
+- better-informed FAST / FULL / REJECT selection
+
+Relation to Cache Support
+-------------------------
+The project also evaluates cache-assisted lookup behavior.
+
+This matters because always querying the blockchain path may increase
+latency, while cache-assisted retrieval can reduce lookup overhead.
+
+So the blockchain story in this project is really:
+
+- trust continuity support
+- query/update abstraction
+- cache-aware overhead control
+
+Technical Positioning
+---------------------
+The blockchain component should be positioned as:
+
+- blockchain-assisted trust continuity
+- tamper-evident trust support
+- compact trust lookup support for handover
+
+It should not be positioned as:
+
+- a full decentralized autonomous infrastructure
+- a cryptocurrency system
+- a fully realistic consensus benchmark
+
+Safe Paper Wording
+------------------
+Blockchain support is used in this work to assist trust continuity across
+RSUs through compact trust-state recording, query, and cache-assisted
+lookup. Its purpose is to support handover-time trust availability rather
+than to serve as a full production blockchain implementation.

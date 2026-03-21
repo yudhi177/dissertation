@@ -1,0 +1,11 @@
+phase,scenario,file,key_metrics_or_claim
+Baseline,Urban default,project_evidence/baseline/urban_default.csv,"txCount; rxCount; pdr; avgDelay_s; throughput_bps"
+Secure,Replay-aware secure communication,project_evidence/secure/secure_meaningful.csv,"txCount; rxCount; replayDrops; pdr; avgDelay_s; throughput_bps"
+Handover,Trust-based RSU handover,project_evidence/handover/handover_meaningful.csv,"handoverCount; avgHandoverDelay_s"
+Adaptive,Adaptive trust + blockchain,project_evidence/adaptive/adaptive_default.csv,"handoverCount; avgAdaptiveTrust; ledgerConsistency; reportsSent; reportsCommitted; blocks; avgBlockLatency"
+Integrated,Valid communication,project_evidence/integrated/final_valid_comm.csv,"pdr_norm; avgDelay_s; throughput_bps; handoverCount; avgLedgerTrust"
+Integrated,Blockchain cache enabled,project_evidence/integrated/final_bc_cache_on.csv,"reportsSent; reportsCommitted; blocks; avgBlockLatency_s; avgLedgerTrust"
+Integrated,Privacy-aware,project_evidence/integrated/final_privacy_meaningful.csv,"privacy events; avgLedgerTrust; reportsSent; reportsCommitted"
+Formal,Insecure protocol baseline,project_evidence/formal/v2x_handover_auth_result.txt,"multiple secrecy/agreement failures"
+Formal,Intermediate secure protocol,project_evidence/formal/v2x_handover_auth_secure_result.txt,"most claims pass; initiator Niagree/Nisynch incomplete"
+Formal,Final verified protocol,project_evidence/formal/v2x_handover_auth_final_result.txt,"secrecy; alive; weakagree; niagree; nisynch pass"

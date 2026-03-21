@@ -1,0 +1,57 @@
+Code Screenshot Shortlist
+=========================
+
+Purpose
+-------
+This shortlist identifies the code regions that are most valuable for
+implementation evidence and optional appendix support.
+
+Primary Integrated Scenario
+---------------------------
+Main file:
+- secure_trust_blockchain_v2x.cc
+
+Recommended screenshot targets from the main integrated file:
+1. Receive path entry and packet classification block
+2. Replay cache / replay filtering logic
+3. Signature or tamper or invalid-packet validation block
+4. Trust update logic after packet handling or event processing
+5. FAST / FULL / REJECT handover decision block
+6. Blockchain query / commit / cache-assisted lookup block
+7. Trust freshness or stale-trust checking block
+8. Privacy pseudonym rotation block if enabled
+9. Logging / metrics summary output block
+10. Attack injection or attacker-mode branch used in experiments
+
+Supporting Scenario Files
+-------------------------
+Recommended supporting files:
+- urban_v2x.cc
+- secure_v2x.cc
+- rsu_handover.cc
+
+Useful screenshot targets from supporting files:
+1. Baseline communication setup
+2. Secure scenario replay-defense logic
+3. Handover scenario trust-threshold logic
+4. Event logging or result writing block
+
+Formal Verification Evidence
+----------------------------
+Useful screenshot targets:
+1. Final Scyther model file showing message flow
+2. Final Scyther result output showing passed claims
+3. Security boundary note if needed in appendix material
+
+Terminal Evidence
+-----------------
+Useful screenshot targets:
+1. Scyther build success
+2. Scyther final verification result
+3. Release bundle listing
+4. Evidence tree / checksum generation summary
+
+Capture Rule
+------------
+Each screenshot should have a clear filename and one-line note describing
+what it proves.

@@ -1,0 +1,116 @@
+Terminology Consistency Sheet
+=============================
+
+Purpose
+-------
+This sheet freezes the preferred terms that should be used consistently
+throughout the paper.
+
+Core Project Identity
+---------------------
+Preferred:
+- secure trust-based V2X communication
+- blockchain-assisted trust continuity
+- privacy-aware operation
+- implementation-backed simulation study
+
+Avoid:
+- full production blockchain system
+- fully proven end-to-end secure architecture
+- complete real-world deployment-ready framework
+
+Security Terms
+--------------
+Preferred:
+- message-level validation
+- packet-level authenticity and integrity filtering
+- replay filtering
+- invalid or tampered packet rejection
+- trust-guided handover authentication
+- handover authentication subprotocol
+- constrained active adversary
+- simulated attacker capabilities
+
+Avoid:
+- full Dolev-Yao secure system
+- CK-secure system
+- eCK-secure system
+- formally proven complete protocol suite
+
+Trust Terms
+-----------
+Preferred:
+- trust score
+- trust freshness
+- stale trust
+- trust-guided decision
+- trust continuity
+- trust-assisted RSU handover
+
+Avoid:
+- perfect trust
+- globally correct trust
+- permanently valid trust state
+
+Handover Terms
+--------------
+Preferred:
+- FAST authentication
+- FULL authentication
+- REJECT decision
+- trust-threshold-based handover
+- RSU transition
+- handover delay
+
+Avoid:
+- zero-cost authentication
+- free authentication
+- guaranteed safe mobility in all conditions
+
+Blockchain Terms
+----------------
+Preferred:
+- blockchain-assisted trust continuity
+- compact trust-state record
+- cache-assisted lookup
+- trust summary
+- integrity-protecting digest or hash
+- continuity support layer
+
+Avoid:
+- cryptocurrency-style blockchain
+- fully decentralized public chain
+- full ledger of all traffic contents
+- on-chain raw packet storage
+
+Privacy Terms
+-------------
+Preferred:
+- pseudonym rotation
+- privacy-aware mode
+- empirical linkability reduction
+- reduced linkability window
+
+Avoid:
+- formally proven anonymity
+- perfect unlinkability
+- complete identity hiding guarantee
+
+Formal Analysis Terms
+---------------------
+Preferred:
+- formally modeled handover authentication subprotocol
+- Scyther analysis
+- within analysis bounds
+- secrecy, aliveness, agreement, and synchronization claims
+
+Avoid:
+- full formal proof of the complete framework
+- full Dolev-Yao proof of the full architecture
+- CK or eCK proof claim
+
+Writing Rule
+------------
+Use one preferred term consistently after first introduction.
+Do not alternate between multiple names for the same concept unless a
+comparison requires it.

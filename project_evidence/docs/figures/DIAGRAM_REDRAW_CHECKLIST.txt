@@ -1,0 +1,21 @@
+Diagram Redraw Checklist
+========================
+
+Use this checklist while redrawing the final diagrams.
+
+[ ] Architecture diagram uses same visual style everywhere
+[ ] Threat model figure uses compact labels only
+[ ] Authentication / handover flowchart clearly shows FAST / FULL / REJECT
+[ ] Blockchain workflow shows query, cache, commit, and handover relation
+[ ] Formal message flow figure matches the final Scyther model at high level
+[ ] No diagram contains long paragraph text
+[ ] All abbreviations are consistent with the terminology sheet
+[ ] Export final diagrams in publication-ready resolution
+
+Recommended Priority
+--------------------
+1. Architecture diagram
+2. Authentication / handover flowchart
+3. Threat model figure
+4. Blockchain continuity workflow
+5. Formal message flow figure

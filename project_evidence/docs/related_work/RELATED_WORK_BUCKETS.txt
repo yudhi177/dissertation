@@ -1,0 +1,26 @@
+Related Work Buckets
+====================
+
+Use the following buckets while filling the comparison table:
+
+1. V2X security and authentication
+2. Trust and misbehavior handling
+3. RSU handover and continuity support
+4. Blockchain-assisted trust continuity
+5. Privacy and pseudonym management
+6. Formal analysis / authentication verification
+7. Simulation platform or implementation environment
+
+Paper Selection Rule
+--------------------
+Only papers that are strongly relevant to at least one of the above buckets
+should enter the main related-work table.
+
+Positioning Rule
+----------------
+The paper should emphasize that this project sits at the intersection of:
+- V2X security filtering
+- trust-guided RSU handover
+- blockchain-assisted continuity
+- privacy-aware operation
+- implementation-backed evaluation

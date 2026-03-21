@@ -1,0 +1,120 @@
+Blockchain Data Model and Hash Sharing
+======================================
+
+Purpose
+-------
+This note explains what kind of information is represented in the
+blockchain-assisted trust continuity layer and how hash-style integrity
+support should be described in the paper.
+
+Why This Clarification Matters
+------------------------------
+The blockchain component in this project is not presented as a full
+transaction-heavy public blockchain system.
+
+Its role is narrower:
+- preserve compact trust-related state across RSUs
+- support trust continuity during handover
+- provide tamper-evident record support for stored trust summaries
+
+What Is Stored
+--------------
+The stored record should be described as a compact trust-state abstraction.
+
+A record may include:
+- vehicle identifier reference or pseudonym-linked reference
+- trust score or trust summary
+- timestamp or freshness marker
+- optional status flags relevant to handover decision support
+- compact integrity-protecting digest / hash representation
+- minimal metadata required for later retrieval
+
+What Is NOT Stored
+------------------
+The paper should not imply that the following are fully stored on-chain:
+
+- full raw packet contents
+- complete traffic history
+- large message bodies
+- all sensor data
+- full cryptographic transcripts
+- full privacy-sensitive identity history
+
+So the safe interpretation is:
+the blockchain-assisted layer stores compact trust continuity records,
+not the entire communication stream.
+
+Hash Sharing Interpretation
+---------------------------
+When discussing "hash sharing" or integrity support, the safe explanation is:
+
+1. A compact trust-related record is prepared by the RSU
+2. A digest / hash-style compact representation is associated with it
+3. That compact protected record is recorded through the blockchain-assisted path
+4. Another RSU later retrieves the stored trust-related state
+5. The retrieved record is treated as continuity support, not blind truth
+
+Meaning of the Hash
+-------------------
+The hash-style element is used to support tamper-evident handling of the
+stored summary record.
+
+It should be described as helping detect whether the committed compact
+record has been altered, rather than as a magical security guarantee.
+
+Practical Meaning in This Project
+---------------------------------
+In the context of this project, "hash sharing" should be understood as:
+
+- sharing compact trust-related state across RSUs
+- preserving a compact integrity-protected representation
+- enabling later trust lookup and continuity support
+- avoiding the claim that raw messages themselves are fully exchanged
+  through blockchain storage
+
+Safe Technical Wording
+----------------------
+A safe technical description is:
+
+"The blockchain-assisted layer records compact trust-related summaries,
+together with timestamped integrity-protecting record representations,
+so that subsequent RSUs can retrieve continuity information during
+handover."
+
+Another safe wording is:
+
+"Instead of storing full communication payloads, the framework uses a
+compact trust-state abstraction with integrity-supporting record binding
+for cross-RSU trust continuity."
+
+How Retrieval Should Be Described
+---------------------------------
+At query time, the target RSU retrieves:
+- trust summary
+- freshness information
+- compact continuity metadata
+
+It then combines this with:
+- local decision logic
+- trust thresholds
+- freshness checks
+- FAST / FULL / REJECT rules
+
+So the blockchain-assisted layer supports the decision process, but does
+not independently authenticate the vehicle on its own.
+
+Red-Line Wording to Avoid
+-------------------------
+Avoid statements such as:
+- all packets are stored on blockchain
+- full communication history is on-chain
+- blockchain alone guarantees authentication
+- hash sharing by itself proves full security
+- complete immutable global truth for every vehicle interaction
+
+Safe Paper Wording
+------------------
+The blockchain-assisted trust continuity layer stores compact trust-related
+records, including freshness information and integrity-protecting compact
+record representations, so that RSUs can retrieve prior trust context
+during handover without relying on full raw message storage.

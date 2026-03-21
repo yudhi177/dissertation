@@ -1,0 +1,39 @@
+Result Interpretation Notes
+===========================
+
+Baseline
+--------
+Use baseline results only to establish the communication reference case.
+
+Secure
+------
+Use secure results to discuss replay filtering and invalid-packet rejection
+inside the simulated environment.
+
+Handover
+--------
+Use handover results to explain how trust is translated into FAST, FULL,
+or REJECT decisions during RSU transition.
+
+Adaptive / Blockchain
+---------------------
+Use adaptive and blockchain-related results to explain trust continuity,
+report commitment behavior, and measurable support overhead.
+Do not present this as a production blockchain benchmark.
+
+Integrated
+----------
+Use integrated results to explain how communication, trust, handover,
+blockchain support, and privacy-aware behavior interact in one combined setup.
+
+Privacy
+-------
+Use privacy-related results only for empirical linkability-reduction style
+interpretation.
+Do not claim formal anonymity proof.
+
+Formal
+------
+Use formal results only for the handover authentication subprotocol modeled
+in Scyther.
+Do not generalize this to the full framework.

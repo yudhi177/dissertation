@@ -1,0 +1,26 @@
+Final Project Status Before Writing
+===================================
+
+Completed Documentation
+-----------------------
+- evidence organization
+- audit and checksums
+- reproducibility documentation
+- security and attacker positioning
+- authentication and handover clarification
+- blockchain and trust freshness clarification
+- formal-analysis boundary and results
+- algorithms and writing-prep pack
+- figure and table planning
+- novelty and section-input preparation
+
+Remaining Practical Work
+------------------------
+1. fill related-work comparison table
+2. export final diagrams
+3. capture curated screenshots
+
+Writing Readiness
+-----------------
+After the above three practical tasks, manuscript drafting can start with the
+current project_evidence bundle as the source-of-truth support pack.

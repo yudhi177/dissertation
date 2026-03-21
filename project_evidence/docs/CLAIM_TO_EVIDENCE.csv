@@ -1,0 +1,11 @@
+claim_id,claim_statement,primary_evidence_file,supporting_file
+C1,Baseline V2X communication was established,project_evidence/baseline/urban_default.csv,
+C2,Replay-aware secure communication produced meaningful delivery and replay-drop behavior,project_evidence/secure/secure_meaningful.csv,
+C3,Trust-based RSU handover produced measurable handover events,project_evidence/handover/handover_meaningful.csv,project_evidence/handover/handover_meaningful_events.csv
+C4,Adaptive trust and blockchain integration generated committed reports and block activity,project_evidence/adaptive/adaptive_default.csv,project_evidence/adaptive/adaptive_default_events.csv
+C5,Integrated valid communication scenario executed successfully,project_evidence/integrated/final_valid_comm.csv,
+C6,Integrated blockchain cache-enabled scenario generated event evidence,project_evidence/integrated/final_bc_cache_on.csv,project_evidence/integrated/final_bc_cache_on_events.csv
+C7,Integrated privacy-aware scenario generated privacy-related event evidence,project_evidence/integrated/final_privacy_meaningful.csv,project_evidence/integrated/final_privacy_meaningful_events.csv
+C8,Initial formal protocol model was insecure,project_evidence/formal/v2x_handover_auth_result.txt,project_evidence/formal/v2x_handover_auth.spdl
+C9,Intermediate formal protocol model improved security but was still incomplete,project_evidence/formal/v2x_handover_auth_secure_result.txt,project_evidence/formal/v2x_handover_auth_secure.spdl
+C10,Final formal protocol model satisfied intended secrecy and agreement goals,project_evidence/formal/v2x_handover_auth_final_result.txt,project_evidence/formal/v2x_handover_auth_final.spdl

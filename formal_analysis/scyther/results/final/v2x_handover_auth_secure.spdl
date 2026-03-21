@@ -1,0 +1,42 @@
+protocol V2XHandoverAuthSecure(V,R)
+{
+  role V
+  {
+    fresh Nv: Nonce;
+    var Nr: Nonce;
+    fresh Tv: Nonce;
+
+    send_1(V,R, V, Nv);
+    recv_2(R,V, R, Nr);
+
+    send_3(V,R, {V,R,Nv,Nr,Tv,{V,R,Nv,Nr,Tv}sk(V)}pk(R));
+
+    recv_4(R,V, {R,V,Nv,Nr,Tv,{R,V,Nv,Nr,Tv}sk(R)}pk(V));
+
+    claim(V,Secret,Tv);
+    claim(V,Alive);
+    claim(V,Weakagree);
+    claim(V,Niagree);
+    claim(V,Nisynch);
+  }
+
+  role R
+  {
+    var Nv: Nonce;
+    fresh Nr: Nonce;
+    var Tv: Nonce;
+
+    recv_1(V,R, V, Nv);
+    send_2(R,V, R, Nr);
+
+    recv_3(V,R, {V,R,Nv,Nr,Tv,{V,R,Nv,Nr,Tv}sk(V)}pk(R));
+
+    send_4(R,V, {R,V,Nv,Nr,Tv,{R,V,Nv,Nr,Tv}sk(R)}pk(V));
+
+    claim(R,Secret,Tv);
+    claim(R,Alive);
+    claim(R,Weakagree);
+    claim(R,Niagree);
+    claim(R,Nisynch);
+  }
+}

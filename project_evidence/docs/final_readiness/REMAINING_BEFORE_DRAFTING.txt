@@ -1,0 +1,15 @@
+Remaining Before Drafting
+=========================
+
+Only the following practical items remain before full paper writing begins:
+
+1. Draw/export the final polished diagrams listed in docs/figures/
+2. Capture the curated code and terminal screenshots listed in docs/screenshots/
+3. Fill the prior-work comparison table using the finalized literature matrix
+4. Start manuscript drafting using the frozen terminology, contributions,
+   limitations, and evidence boundaries already prepared
+
+Interpretation
+--------------
+This means the planning and evidence-preparation phase is effectively complete,
+while the remaining work is mainly visual packaging plus manuscript writing.

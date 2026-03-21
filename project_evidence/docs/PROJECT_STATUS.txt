@@ -1,0 +1,36 @@
+Project Status Summary
+======================
+
+Completed
+---------
+[OK] Baseline VANET simulation evidence prepared
+[OK] Secure communication evidence prepared
+[OK] Trust-based RSU handover evidence prepared
+[OK] Adaptive trust / blockchain evidence prepared
+[OK] Integrated scenario evidence prepared
+[OK] Formal verification with Scyther completed
+[OK] Evidence manifest created
+[OK] Evidence checksums created
+[OK] Reproducibility documentation created
+[OK] Security positioning pack prepared
+[OK] Authentication and handover clarification pack prepared
+[OK] Blockchain clarification pack prepared
+[OK] Trust freshness clarification pack prepared
+[OK] Algorithm pack prepared
+[OK] Table map prepared
+[OK] Figure specification pack prepared
+[OK] Terminology sheet prepared
+[OK] Contributions fixed
+[OK] Limitations and safe claims fixed
+[OK] Novelty positioning pack prepared
+[OK] Section input map prepared
+
+Pending Practical Execution
+---------------------------
+[ ] Fill prior-work comparison template
+[ ] Export final publication-ready diagrams
+[ ] Capture curated screenshots
+
+Paper Writing
+-------------
+[ ] Start after the three pending practical items above

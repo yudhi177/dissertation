@@ -1,0 +1,155 @@
+Figure and Table Map
+====================
+
+Purpose
+-------
+This note fixes the recommended visual asset map before manuscript drafting.
+
+Figure Map
+==========
+
+Figure F1. Overall System Architecture
+Source:
+- architecture diagram
+Purpose:
+- show vehicles, RSUs, security layer, trust engine, handover gate,
+  blockchain support, privacy support, outputs
+
+Figure F2. Packet Receive and Validation Flow
+Source:
+- project_evidence/docs/algorithms/RECEIVE_VALIDATE_ALGORITHM.txt
+Purpose:
+- show replay check, validity check, accept/drop path
+
+Figure F3. Trust-Guided Handover Flow
+Source:
+- project_evidence/docs/security/HANDOVER_DECISION_RULES.txt
+- project_evidence/docs/algorithms/HANDOVER_DECISION_ALGORITHM.txt
+Purpose:
+- show FAST / FULL / REJECT logic
+
+Figure F4. Threat Model / Attack Surface
+Source:
+- project_evidence/docs/security/THREAT_MODEL.txt
+- project_evidence/docs/security/ATTACK_IMPLEMENTATION_MATRIX.csv
+Purpose:
+- show attacker capabilities and defended paths
+
+Figure F5. Blockchain-Assisted Trust Continuity Workflow
+Source:
+- project_evidence/docs/security/BLOCKCHAIN_DATA_MODEL_AND_HASH_SHARING.txt
+- project_evidence/docs/security/TRUST_FRESHNESS_AND_STALENESS.txt
+Purpose:
+- show trust lookup, cache, continuity support, freshness role
+
+Figure F6. Handover Authentication Message Flow
+Source:
+- project_evidence/formal/v2x_handover_auth_final.spdl
+- project_evidence/formal/v2x_handover_auth_final_result.txt
+Purpose:
+- show the final modeled handover-auth exchange at conceptual level
+
+Figure F7. Baseline vs Secure Communication Results
+Source:
+- project_evidence/baseline/urban_default.csv
+- project_evidence/secure/secure_meaningful.csv
+Purpose:
+- show packet delivery and secure filtering impact
+
+Figure F8. Handover Performance Results
+Source:
+- project_evidence/handover/handover_meaningful.csv
+- project_evidence/handover/handover_meaningful_events.csv
+Purpose:
+- show handover delay and event behavior
+
+Figure F9. Blockchain Cache / Continuity Results
+Source:
+- project_evidence/adaptive/adaptive_default.csv
+- project_evidence/integrated/final_bc_cache_on.csv
+- project_evidence/integrated/final_bc_cache_on_events.csv
+Purpose:
+- show continuity support and overhead behavior
+
+Figure F10. Privacy-Aware Scenario Results
+Source:
+- project_evidence/integrated/final_privacy_meaningful.csv
+- project_evidence/integrated/final_privacy_meaningful_events.csv
+Purpose:
+- show privacy-support behavior and event evidence
+
+Table Map
+=========
+
+Table T1. Framework Modules
+Source:
+- implementation and security notes
+Purpose:
+- summarize major modules and roles
+
+Table T2. Simulation Parameters
+Source:
+- final scenario settings and code audit notes
+Purpose:
+- list density, RSU count, packet interval, attack parameters, thresholds
+
+Table T3. Metrics Definitions
+Source:
+- CSV fields and summary notes
+Purpose:
+- define pdr, throughput, replayDrops, handover delay, avgLedgerTrust, etc.
+
+Table T4. Baselines and Ablations
+Source:
+- experiment design freeze notes
+Purpose:
+- summarize baseline, secure, handover, adaptive, integrated variants
+
+Table T5. Attack Implementation Matrix
+Source:
+- project_evidence/docs/security/ATTACK_IMPLEMENTATION_MATRIX.csv
+Purpose:
+- map attacks, triggers, metrics, and defenses
+
+Table T6. Formal Verification Progression
+Source:
+- formal Scyther models and result files
+Purpose:
+- summarize insecure, intermediate, and final model progression
+
+Table T7. Integrated Scenario Summary
+Source:
+- project_evidence/docs/tables/INTEGRATED_SCENARIO_TABLE.csv
+- project_evidence/docs/tables/MASTER_SUMMARY_TABLE.csv
+Purpose:
+- summarize integrated evidence files and their role
+
+Table T8. Claim-to-Evidence Mapping
+Source:
+- project_evidence/docs/CLAIM_TO_EVIDENCE.csv
+Purpose:
+- map each major claim to its supporting evidence file
+
+Table T9. Prior-Work Comparison
+Source:
+- to be filled from literature comparison matrix
+Purpose:
+- position the work against previous studies
+
+Priority Rule
+-------------
+High-priority visuals before writing:
+- F1
+- F3
+- F4
+- F5
+- F8
+- T2
+- T5
+- T6
+- T9
+
+Safe Use Rule
+-------------
+Only include visuals that directly support a research question,
+implementation explanation, or evidence-backed claim.

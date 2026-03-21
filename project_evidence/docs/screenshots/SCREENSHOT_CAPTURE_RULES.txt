@@ -1,0 +1,23 @@
+Screenshot Capture Rules
+========================
+
+Rules
+-----
+- capture only the important region
+- avoid full-screen noisy screenshots
+- keep editor font large enough to read
+- one screenshot should prove one thing
+- filename should clearly match the purpose
+- screenshots are better suited for appendix, viva, or evidence pack
+  than for the main paper body unless the venue allows them
+
+Recommended Usage
+-----------------
+Main paper:
+- minimal use
+
+Appendix / thesis / viva:
+- implementation code blocks
+- Scyther result output
+- evidence structure
+- result folder or command confirmation if needed

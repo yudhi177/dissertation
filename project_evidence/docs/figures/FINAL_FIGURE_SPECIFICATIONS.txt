@@ -1,0 +1,59 @@
+Final Figure Specifications
+===========================
+
+Figure 1. Overall System Architecture
+-------------------------------------
+Purpose:
+Show vehicles, RSUs, message validation path, trust engine, handover gate,
+blockchain-assisted continuity support, privacy module, and outputs.
+
+Figure 2. Threat Model / Attack Surface
+---------------------------------------
+Purpose:
+Show replay attack, tampered or invalid packet injection, malicious behavior,
+stale-trust exploitation, blockchain lookup overhead stress, and privacy
+linkability pressure.
+
+Figure 3. Authentication and Handover Flow
+------------------------------------------
+Purpose:
+Show the split between message-level validation and handover-time decision
+selection (FAST / FULL / REJECT).
+
+Figure 4. Blockchain-Assisted Trust Continuity Workflow
+-------------------------------------------------------
+Purpose:
+Show what is queried, what is cached, what is committed, and how the trust
+continuity path supports handover decisions across RSUs.
+
+Figure 5. Handover Authentication Message Flow
+----------------------------------------------
+Purpose:
+Show the formally modeled handover authentication subprotocol and its final
+message sequence at a high level.
+
+Figure 6. Baseline / Secure Communication Results
+-------------------------------------------------
+Purpose:
+Show baseline communication behavior and secure communication behavior with
+replay-aware filtering.
+
+Figure 7. Handover Results
+--------------------------
+Purpose:
+Show handover counts, delay behavior, and FAST/FULL/REJECT interpretation.
+
+Figure 8. Blockchain / Cache / Privacy Results
+----------------------------------------------
+Purpose:
+Show continuity overhead behavior, cache-assisted effect, and privacy-aware
+scenario outputs.
+
+Style Rules
+-----------
+- use short labels
+- keep fonts consistent
+- use same line thickness and box style
+- reduce text density inside diagrams
+- avoid paragraph text inside figures
+- keep journal-style clean layout

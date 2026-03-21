@@ -1,0 +1,56 @@
+Limitations and Safe Claims
+===========================
+
+Purpose
+-------
+This note freezes what the paper may safely claim and what must be presented
+as a limitation or boundary.
+
+Key Limitations
+---------------
+1. The study is simulation-scoped.
+   It is not a live deployment study.
+
+2. Cryptographic cost is abstracted at the simulation level.
+   It is not a deployment-grade cryptographic benchmark unless separately measured.
+
+3. The blockchain component is an assistance layer for trust continuity.
+   It is not a full production blockchain implementation.
+
+4. Privacy support is empirical.
+   It is not a formal anonymity or unlinkability proof.
+
+5. Formal verification is limited in scope.
+   Only the handover authentication subprotocol is formally modeled in Scyther.
+
+6. Attacker behavior is simulation-constrained.
+   The project does not claim universal real-world attacker coverage.
+
+Safe Claims
+-----------
+- The framework improves resilience against replayed and invalid packets in
+  the simulated environment.
+- Trust-guided FAST / FULL / REJECT control supports safer RSU handover decisions.
+- Blockchain-assisted continuity helps preserve compact trust-related state
+  across RSU transitions.
+- Cache-assisted lookup provides a practical continuity support path for mobility.
+- Privacy-aware mode provides empirical support for reduced linkability.
+- The modeled handover authentication subprotocol satisfies the intended
+  Scyther claims within analysis bounds.
+
+Unsafe Claims
+-------------
+- full formally proven secure framework
+- CK-secure or eCK-secure system
+- full Dolev-Yao secure architecture
+- production-ready blockchain platform
+- formally proven anonymity
+- real deployment latency guarantee
+- full cryptographic benchmark realism without separate measurement
+
+Paper Rule
+----------
+Every strong claim in the manuscript must map to:
+- a result file,
+- a documentation boundary note, or
+- the formal-analysis evidence bundle.

@@ -1,0 +1,81 @@
+Result Validation Summary
+=========================
+
+Purpose
+-------
+This note fixes the manuscript-safe interpretation boundary of the final
+result set before paper drafting.
+
+Canonical Result Sources
+------------------------
+The following categorized folders are the primary evidence locations:
+
+- baseline/
+- secure/
+- handover/
+- adaptive/
+- integrated/
+- formal/
+
+Validated Evidence Layers
+-------------------------
+1. Baseline communication
+   - baseline/urban_default.csv
+   - used only as the communication reference case
+
+2. Secure packet handling
+   - secure/secure_meaningful.csv
+   - used for replay-aware and invalid-packet-aware interpretation
+
+3. Trust-based handover
+   - handover/handover_meaningful.csv
+   - handover/handover_meaningful_events.csv
+   - used for FAST / FULL / REJECT handover interpretation
+
+4. Adaptive trust and blockchain-assisted continuity
+   - adaptive/adaptive_default.csv
+   - adaptive/adaptive_default_events.csv
+   - used for trust adaptation, report activity, and continuity support
+
+5. Integrated scenarios
+   - integrated/final_valid_comm.csv
+   - integrated/final_bc_cache_on.csv
+   - integrated/final_bc_cache_on_events.csv
+   - integrated/final_privacy_meaningful.csv
+   - integrated/final_privacy_meaningful_events.csv
+   - used for combined end-to-end interpretation
+
+6. Formal verification
+   - formal/v2x_handover_auth_result.txt
+   - formal/v2x_handover_auth_secure_result.txt
+   - formal/v2x_handover_auth_final_result.txt
+   - used only for the modeled handover authentication subprotocol
+
+Interpretation Rule
+-------------------
+Every major result statement in the paper must be traceable to one of the
+files above.
+
+Safe Result Positioning
+-----------------------
+- baseline results support baseline communication only
+- secure results support replay / invalid-packet filtering claims
+- handover results support trust-guided authentication control claims
+- adaptive results support trust adaptation and continuity behavior claims
+- integrated results support end-to-end combined behavior claims
+- formal results support only the modeled handover-authentication subprotocol
+
+Unsafe Result Positioning
+-------------------------
+Do not claim:
+- full-framework formal proof
+- production-grade blockchain benchmark realism
+- real cryptographic benchmark realism unless separately measured
+- formally proven anonymity
+- full-system Dolev-Yao security
+
+Consistency Rule
+----------------
+If a manuscript number is reported, it must come from:
+- a canonical evidence CSV or result file, or
+- a clearly identified derived summary built from those files

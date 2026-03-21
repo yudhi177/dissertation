@@ -1,0 +1,24 @@
+Suggested Result Review / Reproduction Order
+
+Phase 1  - Baseline communication
+Phase 2  - Secure communication with replay defense
+Phase 3  - Trust-based RSU handover
+Phase 4  - Adaptive trust / blockchain evidence
+Phase 5  - Integrated end-to-end scenarios
+Phase 6  - Formal verification with Scyther
+
+Expected reading order:
+1. baseline/urban_default.csv
+2. secure/secure_meaningful.csv
+3. handover/handover_meaningful.csv
+4. handover/handover_meaningful_events.csv
+5. adaptive/adaptive_default.csv
+6. adaptive/adaptive_default_events.csv
+7. integrated/final_valid_comm.csv
+8. integrated/final_bc_cache_on.csv
+9. integrated/final_bc_cache_on_events.csv
+10. integrated/final_privacy_meaningful.csv
+11. integrated/final_privacy_meaningful_events.csv
+12. formal/v2x_handover_auth_result.txt
+13. formal/v2x_handover_auth_secure_result.txt
+14. formal/v2x_handover_auth_final_result.txt

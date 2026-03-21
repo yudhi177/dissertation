@@ -1,0 +1,80 @@
+==== FILE EXISTENCE CHECK ====
+[OK] project_evidence/baseline/urban_default.csv
+[OK] project_evidence/secure/secure_meaningful.csv
+[OK] project_evidence/handover/handover_meaningful.csv
+[OK] project_evidence/handover/handover_meaningful_events.csv
+[OK] project_evidence/adaptive/adaptive_default.csv
+[OK] project_evidence/adaptive/adaptive_default_events.csv
+[OK] project_evidence/integrated/final_valid_comm.csv
+[OK] project_evidence/integrated/final_bc_cache_on.csv
+[OK] project_evidence/integrated/final_bc_cache_on_events.csv
+[OK] project_evidence/integrated/final_privacy_meaningful.csv
+[OK] project_evidence/integrated/final_privacy_meaningful_events.csv
+[OK] project_evidence/formal/v2x_handover_auth.spdl
+[OK] project_evidence/formal/v2x_handover_auth_result.txt
+[OK] project_evidence/formal/v2x_handover_auth_secure.spdl
+[OK] project_evidence/formal/v2x_handover_auth_secure_result.txt
+[OK] project_evidence/formal/v2x_handover_auth_final.spdl
+[OK] project_evidence/formal/v2x_handover_auth_final_result.txt
+[OK] project_evidence/docs/REPRODUCIBILITY_README.txt
+[OK] project_evidence/docs/RUN_ORDER.txt
+[OK] project_evidence/docs/CLAIM_TO_EVIDENCE.csv
+[OK] project_evidence/docs/PROJECT_STATUS.txt
+[OK] project_evidence/docs/tables/MASTER_SUMMARY_TABLE.csv
+[OK] project_evidence/docs/tables/FORMAL_VERIFICATION_SUMMARY.csv
+[OK] project_evidence/docs/tables/INTEGRATED_SCENARIO_TABLE.csv
+[OK] project_evidence/EVIDENCE_MANIFEST.csv
+[OK] project_evidence/CHECKSUMS.txt
+
+==== DUPLICATE CONTENT CHECK ====
+abd1267ac85bc739528999470ab73a5b081b1719b8690e294d8f6cf49531a8f8  project_evidence/baseline/urban_default.csv
+abd1267ac85bc739528999470ab73a5b081b1719b8690e294d8f6cf49531a8f8  project_evidence/integrated/urban_default.csv
+d0519544b00f36fbd2c1668424cd18eec4fd4771ced9a5b97971f4a98a758848  project_evidence/secure/secure_meaningful.csv
+d0519544b00f36fbd2c1668424cd18eec4fd4771ced9a5b97971f4a98a758848  project_evidence/integrated/secure_meaningful.csv
+8f77751622aaf8a603ac4f9b6f8951626fbb309dc43209601d347624b6085893  project_evidence/handover/handover_meaningful.csv
+8f77751622aaf8a603ac4f9b6f8951626fbb309dc43209601d347624b6085893  project_evidence/integrated/handover_meaningful.csv
+20594eaaa0175451c076acf0c85e5b97c57160fbc60166e48254616b8b4b8b49  project_evidence/handover/handover_meaningful_events.csv
+
+==== COUNTS ====
+Total files in evidence bundle:
+36
+Files in docs/:
+9
+Files in formal/:
+7
+Files in integrated/:
+11
+
+==== MANIFEST TAIL ====
+project_evidence/integrated/final_bc_cache_on_events.csv,integrated,Integrated blockchain cache-enabled event trace
+project_evidence/integrated/final_privacy_meaningful.csv,integrated,Integrated privacy-aware scenario summary
+project_evidence/integrated/final_privacy_meaningful_events.csv,integrated,Integrated privacy-aware event trace
+project_evidence/formal/v2x_handover_auth.spdl,formal,Initial insecure Scyther protocol model
+project_evidence/formal/v2x_handover_auth_result.txt,formal,Scyther result for insecure protocol
+project_evidence/formal/v2x_handover_auth_secure.spdl,formal,Intermediate secure Scyther protocol model
+project_evidence/formal/v2x_handover_auth_secure_result.txt,formal,Scyther result for intermediate secure model
+project_evidence/formal/v2x_handover_auth_final.spdl,formal,Final authenticated and synchronized Scyther protocol model
+project_evidence/formal/v2x_handover_auth_final_result.txt,formal,Scyther result for final verified model
+project_evidence/formal/README.txt,formal,Explanation of formal verification evidence
+
+==== MASTER FILE LIST TAIL ====
+project_evidence/formal/v2x_handover_auth.spdl
+project_evidence/formal/v2x_handover_auth_final.spdl
+project_evidence/formal/v2x_handover_auth_final_result.txt
+project_evidence/formal/v2x_handover_auth_result.txt
+project_evidence/formal/v2x_handover_auth_secure.spdl
+project_evidence/formal/v2x_handover_auth_secure_result.txt
+project_evidence/handover/handover_meaningful.csv
+project_evidence/handover/handover_meaningful_events.csv
+project_evidence/integrated/adaptive_default.csv
+project_evidence/integrated/adaptive_default_events.csv
+project_evidence/integrated/final_bc_cache_on.csv
+project_evidence/integrated/final_bc_cache_on_events.csv
+project_evidence/integrated/final_privacy_meaningful.csv
+project_evidence/integrated/final_privacy_meaningful_events.csv
+project_evidence/integrated/final_valid_comm.csv
+project_evidence/integrated/handover_meaningful.csv
+project_evidence/integrated/handover_meaningful_events.csv
+project_evidence/integrated/secure_meaningful.csv
+project_evidence/integrated/urban_default.csv
+project_evidence/secure/secure_meaningful.csv

@@ -1,0 +1,6 @@
+scenario,file,purpose
+final_valid_comm,project_evidence/integrated/final_valid_comm.csv,Integrated valid communication scenario
+final_bc_cache_on,project_evidence/integrated/final_bc_cache_on.csv,Integrated blockchain cache-enabled scenario
+final_bc_cache_on_events,project_evidence/integrated/final_bc_cache_on_events.csv,Integrated blockchain cache-enabled event trace
+final_privacy_meaningful,project_evidence/integrated/final_privacy_meaningful.csv,Integrated privacy-aware scenario summary
+final_privacy_meaningful_events,project_evidence/integrated/final_privacy_meaningful_events.csv,Integrated privacy-aware event trace

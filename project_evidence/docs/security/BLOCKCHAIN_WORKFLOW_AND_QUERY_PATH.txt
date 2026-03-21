@@ -1,0 +1,142 @@
+Blockchain Workflow and Query Path
+==================================
+
+Purpose
+-------
+This note explains how the blockchain-assisted trust continuity path should
+be described operationally in the paper.
+
+High-Level Role
+---------------
+The blockchain-assisted layer is used to support trust continuity across
+RSUs during mobility and handover.
+
+It is not the only trust source.
+It is a supporting continuity layer that works together with:
+- local trust state
+- freshness checks
+- handover decision rules
+- cache-assisted lookup
+
+Operational Entities
+--------------------
+The workflow involves:
+
+1. Vehicle
+2. Current RSU
+3. Target RSU
+4. Blockchain-assisted record path
+5. Optional local cache at RSU side
+
+Workflow Overview
+-----------------
+Step 1:
+A vehicle interacts with the current RSU and accumulates trust-related state.
+
+Step 2:
+The current RSU prepares a compact trust-related record or trust summary.
+
+Step 3:
+That record is associated with compact integrity-supporting metadata and is
+made available through the blockchain-assisted continuity layer.
+
+Step 4:
+When the vehicle approaches another RSU, the target RSU attempts to obtain
+prior trust context.
+
+Step 5:
+The target RSU may:
+- read from local cache first
+- query the blockchain-assisted continuity path if needed
+- check freshness of the retrieved state
+
+Step 6:
+The target RSU combines:
+- retrieved trust summary
+- trust freshness
+- local policy
+- FAST / FULL / REJECT thresholds
+
+Step 7:
+The final handover decision is made.
+
+Query Path
+----------
+A safe query path description is:
+
+target RSU
+-> check local cache
+-> if cache hit, use cached trust context
+-> if cache miss, query blockchain-assisted continuity record
+-> retrieve compact trust-related state
+-> apply freshness checks
+-> use result in handover decision logic
+
+Why Cache Matters
+-----------------
+The cache exists to reduce repeated lookup overhead.
+
+Without cache:
+- more frequent remote continuity lookup may occur
+- response delay may increase
+- handover responsiveness may degrade
+
+With cache:
+- repeated trust retrieval can be faster
+- lookup overhead can be reduced
+- continuity support becomes more practical for mobility
+
+What the Query Returns
+----------------------
+The query should be described as returning compact continuity information,
+such as:
+- trust summary
+- timestamp or freshness marker
+- limited decision-support metadata
+
+The query should not be described as returning:
+- full traffic history
+- complete packet logs
+- all communication payloads
+- complete cryptographic message history
+
+Trust Use After Query
+---------------------
+The queried result is not blindly trusted.
+
+The RSU still applies:
+- freshness validation
+- threshold checks
+- trust-policy logic
+- handover mode selection rules
+
+This is important because the blockchain-assisted layer supports continuity,
+but does not replace system decision logic.
+
+Safe Technical Interpretation
+-----------------------------
+The operational meaning is:
+
+- local trust is generated from observed behavior
+- blockchain-assisted storage helps preserve compact trust context
+- target RSUs retrieve prior context when needed
+- cache reduces repeated lookup overhead
+- freshness-aware decision logic determines whether FAST, FULL, or REJECT
+  should be used
+
+Red-Line Wording to Avoid
+-------------------------
+Avoid claiming that:
+- blockchain directly authenticates vehicles by itself
+- the query result is always final truth
+- all trust is globally solved only by blockchain
+- cache eliminates the need for verification
+- full communication history is retrieved during handover
+
+Safe Paper Wording
+------------------
+During RSU transition, the target RSU first checks cached continuity
+information and, when needed, queries the blockchain-assisted trust
+continuity layer for compact prior trust context. The retrieved state is
+then freshness-checked and combined with local handover decision logic to
+select FAST, FULL, or REJECT authentication.

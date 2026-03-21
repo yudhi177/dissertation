@@ -1,0 +1,4 @@
+model_file,result_file,summary
+project_evidence/formal/v2x_handover_auth.spdl,project_evidence/formal/v2x_handover_auth_result.txt,Initial model insecure with multiple failed claims
+project_evidence/formal/v2x_handover_auth_secure.spdl,project_evidence/formal/v2x_handover_auth_secure_result.txt,Improved model with secrecy and weak agreement largely satisfied but initiator-side completeness still pending
+project_evidence/formal/v2x_handover_auth_final.spdl,project_evidence/formal/v2x_handover_auth_final_result.txt,Final model satisfies target authentication and synchronization goals

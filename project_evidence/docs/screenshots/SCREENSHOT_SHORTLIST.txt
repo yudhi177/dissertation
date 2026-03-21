@@ -1,0 +1,124 @@
+Screenshot Shortlist
+====================
+
+Purpose
+-------
+This note fixes the small curated screenshot set that may be used later in
+the dissertation or paper-support pack.
+
+Why a Shortlist Is Needed
+-------------------------
+Screenshots should support explanation, not create clutter.
+
+Only implementation-relevant and evidence-relevant screenshots should be kept.
+Do not capture full files, random desktop views, or oversized terminal dumps.
+
+Capture Rules
+-------------
+1. Capture only the important code block or terminal result.
+2. Keep the screenshot tightly cropped.
+3. Make function names or decision logic clearly visible.
+4. Do not include unrelated editor tabs or desktop clutter.
+5. Prefer readable zoom over large full-page screenshots.
+6. Use consistent naming.
+
+Recommended Screenshot Set
+--------------------------
+
+SS1. Primary integrated scenario overview
+Target:
+- secure_trust_blockchain_v2x.cc
+Capture:
+- file header or the main area showing this is the integrated scenario
+Why:
+- identifies the main source file for the full framework
+
+SS2. Receive-path replay filtering block
+Target:
+- packet receive / replay-defense logic
+Capture:
+- code block where replayed packets are detected and dropped
+Why:
+- supports message-level security explanation
+
+SS3. Invalid-signature / tamper validation block
+Target:
+- packet validation logic
+Capture:
+- code area where invalid or tampered packets are rejected
+Why:
+- supports authenticity / integrity filtering explanation
+
+SS4. Trust update logic block
+Target:
+- trust engine update section
+Capture:
+- code block where trust is increased, decreased, or refreshed
+Why:
+- supports trust-control explanation
+
+SS5. Handover FAST / FULL / REJECT decision block
+Target:
+- handover decision logic
+Capture:
+- code block showing trust-threshold decision path
+Why:
+- this is one of the core implementation screenshots
+
+SS6. Blockchain query / cache logic block
+Target:
+- blockchain-assisted trust lookup path
+Capture:
+- code block showing query, cache check, or continuity lookup
+Why:
+- supports blockchain role clarification
+
+SS7. Privacy pseudonym rotation block
+Target:
+- privacy support section
+Capture:
+- code block showing pseudonym rotation trigger or update
+Why:
+- supports privacy mechanism explanation
+
+SS8. Logging / metrics output block
+Target:
+- CSV logging or metric write-out section
+Capture:
+- code block showing summary or event output generation
+Why:
+- supports reproducibility and evidence generation
+
+SS9. Attack injection / malicious mode block
+Target:
+- replay mode, tamper mode, or malicious behavior trigger
+Capture:
+- code block where attack behavior is introduced
+Why:
+- supports attacker implementation explanation
+
+SS10. Final Scyther result terminal output
+Target:
+- formal verification final run output
+Capture:
+- terminal section where final claims pass
+Why:
+- supports formal evidence presentation
+
+Suggested File Names
+--------------------
+SS1_primary_integrated_scenario.png
+SS2_replay_filter_block.png
+SS3_invalid_packet_validation_block.png
+SS4_trust_update_block.png
+SS5_handover_decision_block.png
+SS6_blockchain_cache_lookup_block.png
+SS7_privacy_rotation_block.png
+SS8_logging_metrics_block.png
+SS9_attack_injection_block.png
+SS10_scyther_final_result_terminal.png
+
+Safe Use Rule
+-------------
+These screenshots are supporting visual aids only.
+They must not replace the formal description, algorithms, or evidence tables.

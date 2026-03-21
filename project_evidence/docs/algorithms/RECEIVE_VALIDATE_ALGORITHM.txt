@@ -1,0 +1,89 @@
+Receive-and-Validate Algorithm
+==============================
+
+Purpose
+-------
+This algorithm summarizes the packet-level receive path used in the project.
+
+Goal
+----
+To ensure that only acceptable packets are processed further by applying
+replay filtering and validity checks before trust-aware use.
+
+Inputs
+------
+- received packet P
+- sender identifier S
+- replay cache state
+- validation settings
+- packet metadata
+
+Outputs
+-------
+- ACCEPT
+or
+- DROP
+
+Algorithm
+---------
+Step 1:
+Receive packet P from sender S.
+
+Step 2:
+Check whether P matches replay-defense conditions.
+
+If packet is already present in replay cache:
+- classify as replayed packet
+- increment replay-drop related counters
+- DROP packet
+
+Else:
+- continue to validation stage
+
+Step 3:
+Check packet validity / tamper / signature-style validation conditions.
+
+If packet fails validation:
+- classify as invalid or tampered
+- increment invalid-drop related counters
+- DROP packet
+
+Else:
+- continue
+
+Step 4:
+Mark packet as accepted by receive path.
+
+Step 5:
+Update local receive counters and any required packet statistics.
+
+Step 6:
+Pass packet to higher-level processing such as:
+- trust update path
+- communication statistics
+- handover-related logic when relevant
+
+Decision Summary
+----------------
+Replay hit
+-> DROP
+
+Invalid / tampered / signature-failed packet
+-> DROP
+
+Fresh and valid packet
+-> ACCEPT
+
+Why This Matters
+----------------
+This receive path provides the first security filter in the framework.
+
+It prevents:
+- repeated replayed traffic from being re-accepted
+- malformed or invalid packets from affecting trusted flow
+
+Safe Paper Wording
+------------------
+At packet reception, the framework applies a receive-and-validate path
+that first checks replay status and then applies validity filtering.
+Only packets that pass both stages are accepted for further processing.

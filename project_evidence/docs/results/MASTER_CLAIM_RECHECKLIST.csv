@@ -1,0 +1,11 @@
+claim_id,claim_area,claim_statement,primary_source,supporting_source,recheck_before_writing,status
+R1,Baseline,Baseline communication was established,project_evidence/baseline/urban_default.csv,,Verify exact tx rx pdr delay throughput values,Pending
+R2,Secure,Replay-aware secure communication produced meaningful filtering behavior,project_evidence/secure/secure_meaningful.csv,,Verify replayDrops and secure delivery wording,Pending
+R3,Handover,Trust-guided handover produced measurable handover behavior,project_evidence/handover/handover_meaningful.csv,project_evidence/handover/handover_meaningful_events.csv,Verify delay and event interpretation,Pending
+R4,Adaptive,Adaptive trust and blockchain integration produced ledger-related activity,project_evidence/adaptive/adaptive_default.csv,project_evidence/adaptive/adaptive_default_events.csv,Verify reports committed blocks and trust wording,Pending
+R5,Integrated,Integrated valid communication scenario executed successfully,project_evidence/integrated/final_valid_comm.csv,,Verify summary numbers used in manuscript,Pending
+R6,Integrated,Cache-enabled blockchain scenario generated event-backed evidence,project_evidence/integrated/final_bc_cache_on.csv,project_evidence/integrated/final_bc_cache_on_events.csv,Verify overhead wording stays scoped,Pending
+R7,Integrated,Privacy-aware scenario generated privacy-related evidence,project_evidence/integrated/final_privacy_meaningful.csv,project_evidence/integrated/final_privacy_meaningful_events.csv,Verify privacy claims remain empirical,Pending
+R8,Formal,Initial formal model was insecure,project_evidence/formal/v2x_handover_auth_result.txt,project_evidence/formal/v2x_handover_auth.spdl,Use fail wording correctly,Pending
+R9,Formal,Intermediate formal model improved security but was still incomplete,project_evidence/formal/v2x_handover_auth_secure_result.txt,project_evidence/formal/v2x_handover_auth_secure.spdl,Use partial-pass wording correctly,Pending
+R10,Formal,Final formal model satisfied target secrecy and agreement claims within bounds,project_evidence/formal/v2x_handover_auth_final_result.txt,project_evidence/formal/v2x_handover_auth_final.spdl,Use bounded Scyther wording only,Pending

@@ -1,0 +1,118 @@
+Handover Decision Rules
+=======================
+
+Purpose
+-------
+This document defines how the system decides which authentication mode
+to apply when a vehicle moves between RSU regions.
+
+Decision Outputs
+----------------
+At handover time, the system selects one of the following:
+
+1. FAST authentication
+2. FULL authentication
+3. REJECT
+
+Inputs Used for Decision
+------------------------
+The decision is based on:
+
+- Trust Score (T)
+- Trust Freshness (F)
+- Threshold values (T_high, T_low)
+- Freshness timeout (F_limit)
+
+Decision Logic
+--------------
+
+Case 1: FAST Authentication
+---------------------------
+Condition:
+- T >= T_high
+- F is fresh (within F_limit)
+
+Meaning:
+- Vehicle is highly trusted
+- Trust data is recent
+
+Action:
+- Skip full authentication
+- Allow quick session continuation
+
+Outcome:
+- Minimal delay
+- Optimized for real-time mobility
+
+Case 2: FULL Authentication
+---------------------------
+Condition:
+- T_low <= T < T_high
+OR
+- Trust is stale (F expired)
+
+Meaning:
+- Vehicle is moderately trusted
+- OR trust needs re-validation
+
+Action:
+- Perform full authentication handshake
+- Recompute trust after validation
+
+Outcome:
+- Higher delay than FAST
+- Stronger verification
+
+Case 3: REJECT
+--------------
+Condition:
+- T < T_low
+
+Meaning:
+- Vehicle is considered untrusted or suspicious
+
+Action:
+- Deny authentication
+- Block communication
+
+Outcome:
+- Prevents malicious participation
+
+Threshold Interpretation
+------------------------
+T_high:
+- Minimum trust required for FAST authentication
+
+T_low:
+- Minimum trust required for system acceptance
+
+F_limit:
+- Maximum allowed age of trust data
+
+Operational Flow
+----------------
+Vehicle enters new RSU zone
+-> Retrieve trust score (local or blockchain)
+-> Check freshness
+-> Apply decision logic
+-> Execute FAST / FULL / REJECT
+
+Design Rationale
+----------------
+This rule-based system ensures:
+
+- Low latency for trusted vehicles
+- Strong verification for uncertain vehicles
+- Immediate blocking of malicious nodes
+
+It balances:
+
+- Security
+- Performance
+- Mobility efficiency
+
+Safe Paper Wording
+------------------
+The handover authentication mechanism applies threshold-based decision
+rules using trust score and freshness to dynamically select FAST,
+FULL, or REJECT authentication modes during RSU transitions.

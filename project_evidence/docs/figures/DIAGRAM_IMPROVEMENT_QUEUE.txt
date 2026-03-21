@@ -1,0 +1,39 @@
+Diagram Improvement Queue
+=========================
+
+Priority Order
+--------------
+1. Overall system architecture
+2. Threat model and attack surface
+3. FAST / FULL / REJECT handover flow
+4. Message-level receive and validate flow
+5. Blockchain-assisted trust continuity workflow
+6. Formal handover authentication sequence
+
+Style Rules
+-----------
+- consistent font family
+- consistent line thickness
+- consistent arrow style
+- short labels only
+- avoid overcrowded text
+- reviewer-friendly layout
+- security and trust layers clearly separated
+- optional modules visually marked as optional where needed
+
+Expected Final Visual Set
+-------------------------
+Core diagrams:
+- architecture diagram
+- threat model figure
+- authentication / validation flowchart
+- handover decision flowchart
+- blockchain continuity workflow
+- formal authentication sequence
+
+Result visuals:
+- baseline versus secure comparison
+- handover result figure
+- adaptive/blockchain result figure
+- integrated cache-enabled result figure
+- integrated privacy-aware result figure

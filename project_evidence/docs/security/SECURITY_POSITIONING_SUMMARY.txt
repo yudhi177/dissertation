@@ -1,0 +1,17 @@
+Security Positioning Summary
+============================
+
+This project should be presented as an implementation-backed simulation study
+of secure trust-based V2X communication with blockchain-assisted trust
+continuity and privacy-aware operation.
+
+Security is achieved at three levels:
+1. packet level:
+   replay filtering and invalid/tampered packet rejection
+2. control level:
+   trust-guided FAST / FULL / REJECT handover decisions
+3. continuity level:
+   blockchain-assisted trust lookup with cache support
+
+Formal verification is limited to the handover authentication subprotocol and
+must not be generalized to the full framework.

@@ -1,0 +1,12 @@
+claim_id,claim_statement,primary_file,main_metric_or_evidence,safe_interpretation
+R1,Baseline communication exists,project_evidence/baseline/urban_default.csv,txCount rxCount pdr avgDelay throughput,Basic communication reference
+R2,Secure packet handling improves resilience against replay and invalid traffic,project_evidence/secure/secure_meaningful.csv,replayDrops pdr avgDelay throughput,Packet-level filtering evidence in simulation
+R3,Handover control supports FAST FULL REJECT selection,project_evidence/handover/handover_meaningful.csv,handoverCount avgHandoverDelay,Trust-guided mobility control evidence
+R4,Handover behavior is supported by explicit event traces,project_evidence/handover/handover_meaningful_events.csv,event trace rows,Handover path is evidenced by event records
+R5,Adaptive trust and continuity behavior are active,project_evidence/adaptive/adaptive_default.csv,avgAdaptiveTrust ledgerConsistency reportsCommitted blocks,Continuity support is behaviorally evidenced
+R6,Integrated valid communication executes successfully,project_evidence/integrated/final_valid_comm.csv,pdr_norm avgDelay_s throughput_bps handoverCount,Combined scenario viability evidence
+R7,Cache-enabled blockchain path has measurable behavior,project_evidence/integrated/final_bc_cache_on.csv,reportsSent reportsCommitted blocks avgBlockLatency_s avgLedgerTrust,Blockchain-assisted continuity overhead can be discussed carefully
+R8,Privacy-aware mode has empirical event evidence,project_evidence/integrated/final_privacy_meaningful.csv,privacy-related summary values,Privacy support is empirical not formal
+R9,Initial formal protocol model is insecure,project_evidence/formal/v2x_handover_auth_result.txt,failed secrecy and agreement claims,Used only as formal baseline contrast
+R10,Intermediate formal protocol improves security but remains incomplete,project_evidence/formal/v2x_handover_auth_secure_result.txt,partial pass and remaining failures,Used only as intermediate formal contrast
+R11,Final formal protocol satisfies intended modeled claims,project_evidence/formal/v2x_handover_auth_final_result.txt,secrecy alive weakagree niagree nisynch pass,Applies only to the modeled handover authentication subprotocol

@@ -1,0 +1,208 @@
+from pathlib import Path
+import re
+
+targets = [
+    Path.home() / "dissertation/ns3/scenarios/secure_trust_blockchain_v2x.cc",
+    Path.home() / "ns-3/scratch/secure_trust_blockchain_v2x.cc",
+]
+
+def ensure_include(txt: str, inc: str) -> str:
+    if inc in txt:
+        return txt
+    if "#include <iostream>" in txt:
+        return txt.replace("#include <iostream>\n", "#include <iostream>\n" + inc + "\n", 1)
+    return inc + "\n" + txt
+
+PH2_BLOCK = r'''
+// PHASE2_SECURITY_PACK_V4_BEGIN
+// --- Phase 2: Security completeness (DoS rate-limit + Rekey policy + Anti-downgrade) ---
+
+// Rekey policy
+static bool     g_enableRekey = false;
+static uint32_t g_rekeyIntervalMs = 2000;
+static bool     g_rekeyOnHandover = true;
+static uint64_t g_rekeyEvents = 0;
+
+// Anti-downgrade protection
+static bool     g_enableAntiDowngrade = true;
+static bool     g_enableDowngradeAttack = false; // test knob
+static uint64_t g_downgradeDetected = 0;
+
+// Rate limiting (token bucket) for auth probes
+static bool     g_enableAuthRateLimit = true;
+static double   g_rlRatePerSec = 5.0;   // tokens/sec
+static double   g_rlBurst      = 10.0;  // max tokens
+static uint64_t g_rateLimitDrop = 0;
+
+struct RateBucket
+{
+  double tokens = 0.0;
+  double lastS  = 0.0;
+};
+
+static std::unordered_map<uint32_t, RateBucket> g_authRl;
+
+static inline void Phase2Evt(const std::string& s)
+{
+  if (g_evt.is_open())
+  {
+    g_evt << Simulator::Now().GetSeconds() << "," << s << "\n";
+  }
+}
+
+static inline bool AuthRateLimitAllow(uint32_t senderId)
+{
+  if (!g_enableAuthRateLimit) return true;
+
+  const double now = Simulator::Now().GetSeconds();
+  auto &b = g_authRl[senderId];
+
+  if (b.lastS == 0.0)
+  {
+    b.lastS = now;
+    b.tokens = g_rlBurst;
+  }
+
+  const double dt = now - b.lastS;
+  b.lastS = now;
+  b.tokens = std::min(g_rlBurst, b.tokens + dt * g_rlRatePerSec);
+
+  if (b.tokens >= 1.0)
+  {
+    b.tokens -= 1.0;
+    return true;
+  }
+
+  g_rateLimitDrop++;
+  Phase2Evt("RATE_LIMIT_DROP sender=" + std::to_string(senderId));
+  return false;
+}
+
+static inline void RekeyEvent(uint32_t a, uint32_t b)
+{
+  if (!g_enableRekey) return;
+  g_rekeyEvents++;
+  Phase2Evt("REKEY_EVENT a=" + std::to_string(a) + " b=" + std::to_string(b) +
+            " intervalMs=" + std::to_string(g_rekeyIntervalMs));
+}
+
+static inline void PrintPhase2Stats()
+{
+  std::cout << "[PHASE2]"
+            << " rekeyEvents=" << g_rekeyEvents
+            << " rateLimitDrop=" << g_rateLimitDrop
+            << " downgradeDetected=" << g_downgradeDetected
+            << " downgradeAttackOn=" << (g_enableDowngradeAttack ? 1 : 0)
+            << std::endl;
+}
+
+// Rekey timer
+static void RekeyTick()
+{
+  if (!g_enableRekey) return;
+  RekeyEvent(0, 1);
+  Simulator::Schedule(MilliSeconds(g_rekeyIntervalMs), &RekeyTick);
+}
+// PHASE2_SECURITY_PACK_V4_END
+'''
+
+def remove_old_phase2(txt: str) -> str:
+    txt = re.sub(r"// PHASE2_SECURITY_PACK_V1_BEGIN.*?// PHASE2_SECURITY_PACK_V1_END\s*", "", txt, flags=re.S)
+    txt = re.sub(r"// PHASE2_SECURITY_PACK_V2_BEGIN.*?// PHASE2_SECURITY_PACK_V2_END\s*", "", txt, flags=re.S)
+    txt = re.sub(r"// PHASE2_SECURITY_PACK_V3_BEGIN.*?// PHASE2_SECURITY_PACK_V3_END\s*", "", txt, flags=re.S)
+    txt = re.sub(r"// PHASE2_SECURITY_PACK_V4_BEGIN.*?// PHASE2_SECURITY_PACK_V4_END\s*", "", txt, flags=re.S)
+    txt = re.sub(r"^\s*// PHASE2_RATE_LIMIT_.*\n", "", txt, flags=re.M)
+    return txt
+
+for p in targets:
+    if not p.exists():
+        continue
+
+    txt = p.read_text()
+
+    txt = ensure_include(txt, "#include <unordered_map>")
+    txt = ensure_include(txt, "#include <algorithm>")
+
+    txt = remove_old_phase2(txt)
+
+    # Insert Phase2 block right after: static std::ofstream g_evt;
+    m_evt = re.search(r"static\s+std::ofstream\s+g_evt\s*;\s*\n", txt)
+    if not m_evt:
+        raise SystemExit(f"[ERR] g_evt not found in {p}")
+    ins = m_evt.end()
+    txt = txt[:ins] + PH2_BLOCK + txt[ins:]
+
+    # Add cmd flags once (after auth replay flags if possible)
+    if 'cmd.AddValue("enableAuthRateLimit"' not in txt:
+        anchor = re.search(r'cmd\.AddValue\("authReplayEveryN".*?\);\s*\n', txt)
+        if not anchor:
+            anchor = re.search(r'cmd\.AddValue\("enableAuthReplayAttack".*?\);\s*\n', txt)
+        if not anchor:
+            anchor = re.search(r'cmd\.AddValue\("enableAuthProbe".*?\);\s*\n', txt)
+        if not anchor:
+            raise SystemExit(f"[ERR] cmd.AddValue anchor not found in {p}")
+        pos = anchor.end()
+        txt = txt[:pos] + (
+            '  cmd.AddValue("enableRekey", "Enable rekey policy 0/1", g_enableRekey);\n'
+            '  cmd.AddValue("rekeyIntervalMs", "Rekey interval (ms)", g_rekeyIntervalMs);\n'
+            '  cmd.AddValue("rekeyOnHandover", "Rekey on handover 0/1", g_rekeyOnHandover);\n'
+            '  cmd.AddValue("enableAntiDowngrade", "Anti-downgrade protection 0/1", g_enableAntiDowngrade);\n'
+            '  cmd.AddValue("enableDowngradeAttack", "Test: simulate peer forcing FAST downgrade 0/1", g_enableDowngradeAttack);\n'
+            '  cmd.AddValue("enableAuthRateLimit", "Auth rate limiting 0/1", g_enableAuthRateLimit);\n'
+            '  cmd.AddValue("rlRatePerSec", "Rate limit tokens per second", g_rlRatePerSec);\n'
+            '  cmd.AddValue("rlBurst", "Rate limit burst tokens", g_rlBurst);\n'
+        ) + txt[pos:]
+
+    # Schedule RekeyTick after cmd.Parse
+    sched_marker = "  // PHASE2_REKEY_SCHED_V4\n"
+    if sched_marker not in txt:
+        m_parse = re.search(r"cmd\.Parse\(argc,\s*argv\);\s*\n", txt)
+        if m_parse:
+            pos = m_parse.end()
+            txt = txt[:pos] + (
+                sched_marker +
+                "  if (g_enableRekey)\n"
+                "  {\n"
+                "    Simulator::Schedule(MilliSeconds(g_rekeyIntervalMs), &RekeyTick);\n"
+                "  }\n"
+            ) + txt[pos:]
+
+    # Print stats after Simulator::Run();
+    if "PrintPhase2Stats();" not in txt:
+        m_run = re.search(r"^\s*Simulator::Run\(\)\s*;\s*$", txt, flags=re.M)
+        if m_run:
+            pos = m_run.end()
+            txt = txt[:pos] + "\n  PrintPhase2Stats();\n" + txt[pos:]
+
+    # Wire rate limit into AuthProbeTick() (sender=0 model)
+    m_ap = re.search(r"static\s+void\s+AuthProbeTick\s*\(\s*\)\s*\{", txt)
+    if m_ap:
+        body = txt[m_ap.end():m_ap.end()+1500]
+        if "AuthRateLimitAllow(0)" not in body:
+            txt = txt[:m_ap.end()] + "\n  // PHASE2_RATE_LIMIT_V4\n  if (!AuthRateLimitAllow(0)) { return; }\n" + txt[m_ap.end():]
+
+    # Wire anti-downgrade safely: after first 'fast =' line in CheckHandover
+    m_ch = re.search(r"static\s+void\s+CheckHandover\s*\([^\)]*\)\s*\{", txt)
+    if m_ch:
+        seg = txt[m_ch.end():m_ch.end()+14000]
+        if "PHASE2_DOWNGRADE_GUARD_V4" not in seg:
+            mf = re.search(r"^\s*(?:const\s+)?bool\s+fast\s*=\s*.*?;\s*$", seg, flags=re.M)
+            if mf:
+                line_end = seg.find("\n", mf.start())
+                ins3 = m_ch.end() + line_end + 1
+                guard = (
+                    "  // PHASE2_DOWNGRADE_GUARD_V4\n"
+                    "  if (g_enableAntiDowngrade && g_enableDowngradeAttack)\n"
+                    "  {\n"
+                    "    if (!fast)\n"
+                    "    {\n"
+                    "      g_downgradeDetected++;\n"
+                    "      Phase2Evt(std::string(\"DOWNGRADE_DETECTED id=\") + std::to_string(id));\n"
+                    "      return;\n"
+                    "    }\n"
+                    "  }\n"
+                )
+                txt = txt[:ins3] + guard + txt[ins3:]
+
+    p.write_text(txt)
+    print("[OK] Phase2 V4 applied:", p)

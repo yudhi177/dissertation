@@ -1,0 +1,144 @@
+Blockchain Technical Workflow
+=============================
+
+Purpose
+-------
+This document explains the technical workflow of the blockchain-assisted
+trust continuity component used in the project.
+
+Main Role
+---------
+The blockchain-assisted layer is used to support trust continuity across
+RSUs when vehicles move between infrastructure regions.
+
+It is not the main packet-security mechanism.
+It is a support mechanism for storing and retrieving compact trust-related
+state.
+
+Entities
+--------
+1. Vehicle
+2. Current RSU
+3. Target RSU
+4. Blockchain-assisted trust store
+5. Local cache at RSU side
+
+Workflow Overview
+-----------------
+The workflow can be understood in five stages:
+
+1. Local observation and trust update
+2. Compact trust-state preparation
+3. Commit / record into blockchain-assisted layer
+4. Query / retrieval by another RSU
+5. Trust-guided handover decision
+
+Stage 1: Local Observation and Trust Update
+-------------------------------------------
+The current RSU observes vehicle behavior through the simulated trust logic.
+
+Examples of input to trust logic include:
+- packet validation outcome
+- replay-related behavior
+- invalid/tampered packet behavior
+- malicious or suspicious activity effects
+- ongoing interaction quality
+
+From this, the RSU maintains or updates a local trust value for the vehicle.
+
+Stage 2: Compact Trust-State Preparation
+----------------------------------------
+Before continuity support is used, the RSU prepares a compact trust-related
+record.
+
+This record is not described as full raw traffic storage.
+Instead, it is a compact state abstraction used for continuity purposes.
+
+Typical contents include:
+- vehicle identifier or pseudonym-linked reference
+- trust score or summary value
+- freshness-related timestamp
+- minimal state needed for later lookup
+- optional integrity-protecting compact representation
+
+Stage 3: Commit / Record
+------------------------
+The compact trust-related state is then recorded through the
+blockchain-assisted path.
+
+Meaning:
+- the trust-related summary becomes available beyond only one local RSU
+- later RSUs can retrieve earlier context
+- the system gains tamper-evident continuity support
+
+In the project, this is modeled as an abstracted blockchain-support layer,
+not as a full production ledger deployment.
+
+Stage 4: Query / Retrieval
+--------------------------
+When the vehicle approaches another RSU region, the target RSU may need
+earlier trust context.
+
+The target RSU can:
+- query the blockchain-assisted layer
+- retrieve trust-related state
+- use local cache if a recent lookup already exists
+
+Cache Role
+----------
+Cache support is important because repeated direct lookup may increase
+latency.
+
+So the system studies:
+- cache-enabled behavior
+- query-heavy behavior
+- overhead differences between lookup styles
+
+This helps evaluate whether trust continuity support can be used without
+forcing unnecessary lookup cost at every step.
+
+Stage 5: Handover Decision
+--------------------------
+After retrieval, the target RSU does not blindly trust the returned value.
+
+It still checks:
+- trust score
+- trust freshness
+- configured thresholds
+- local decision rules
+
+Then it chooses:
+- FAST authentication
+- FULL authentication
+- REJECT
+
+So the blockchain-assisted layer supports the decision, but does not replace
+the handover control logic.
+
+End-to-End Interpretation
+-------------------------
+Current RSU observes behavior
+-> trust is updated locally
+-> compact trust-state is prepared
+-> trust-state is recorded in blockchain-assisted layer
+-> target RSU retrieves trust-state directly or from cache
+-> freshness and thresholds are checked
+-> FAST / FULL / REJECT is selected
+
+Why This Matters
+----------------
+Without continuity support, a new RSU may have limited knowledge about a
+vehicle at the moment of handover.
+
+With blockchain-assisted trust continuity:
+- earlier trust context can be retrieved
+- repeated trust rebuilding can be reduced
+- handover decisions can use broader context
+- cache can reduce lookup overhead
+
+Safe Paper Wording
+------------------
+The blockchain-assisted workflow is used to record and retrieve compact
+trust-related state across RSUs. At handover time, the target RSU combines
+this retrieved context with freshness checks and threshold-based logic to
+select FAST, FULL, or REJECT authentication.

@@ -1,0 +1,41 @@
+Reproduction Entrypoints
+========================
+
+Purpose
+-------
+This note identifies the main evidence entrypoints that a reviewer or
+examiner should inspect first.
+
+Core Evidence Order
+-------------------
+1. baseline/urban_default.csv
+2. secure/secure_meaningful.csv
+3. handover/handover_meaningful.csv
+4. handover/handover_meaningful_events.csv
+5. adaptive/adaptive_default.csv
+6. adaptive/adaptive_default_events.csv
+7. integrated/final_valid_comm.csv
+8. integrated/final_bc_cache_on.csv
+9. integrated/final_bc_cache_on_events.csv
+10. integrated/final_privacy_meaningful.csv
+11. integrated/final_privacy_meaningful_events.csv
+12. formal/v2x_handover_auth_result.txt
+13. formal/v2x_handover_auth_secure_result.txt
+14. formal/v2x_handover_auth_final_result.txt
+
+Supporting Interpretation Files
+-------------------------------
+- docs/results/RESULT_VALIDATION_SUMMARY.txt
+- docs/security/THREAT_MODEL.txt
+- docs/security/AUTHENTICATION_FLOW.txt
+- docs/security/HANDOVER_DECISION_RULES.txt
+- docs/security/BLOCKCHAIN_DATA_MODEL_AND_HASH_SHARING.txt
+- docs/security/TRUST_FRESHNESS_AND_STALENESS.txt
+- docs/algorithms/RECEIVE_VALIDATE_ALGORITHM.txt
+- docs/algorithms/HANDOVER_DECISION_ALGORITHM.txt
+
+Formal Reproduction
+-------------------
+The formal-analysis reproduction path is preserved in:
+- docs/repro/KNOWN_COMMAND_LOG.txt
+- formal/

@@ -1,0 +1,87 @@
+Primary and Supporting Scenario Map
+===================================
+
+Purpose
+-------
+This note fixes which scenario is the main implementation reference and
+which scenarios are supporting evidence only.
+
+Primary Scenario
+----------------
+Primary implementation scenario:
+- secure_trust_blockchain_v2x.cc
+
+Why it is primary:
+- combines secure packet processing
+- trust-guided control
+- RSU handover logic
+- blockchain-assisted trust continuity
+- cache-aware lookup behavior
+- privacy-aware scenario support
+- integrated logging and summary outputs
+
+This is the main file to reference when describing the complete framework.
+
+Supporting Scenarios
+--------------------
+1. urban_v2x.cc
+   Role:
+   - baseline communication reference
+   Use:
+   - baseline packet delivery, delay, and throughput comparison
+
+2. secure_v2x.cc
+   Role:
+   - secure communication reference
+   Use:
+   - replay defense and invalid-packet filtering explanation
+
+3. rsu_handover.cc
+   Role:
+   - focused handover behavior reference
+   Use:
+   - FAST / FULL / REJECT style handover evaluation
+
+4. adaptive trust / blockchain scenarios
+   Role:
+   - focused trust continuity and ledger behavior reference
+   Use:
+   - adaptive trust metrics, reports, blocks, and continuity support
+
+Interpretation Rule
+-------------------
+When the paper explains the full framework:
+- use secure_trust_blockchain_v2x.cc as the primary implementation source
+
+When the paper explains isolated evidence:
+- use supporting scenarios for focused behavior discussion
+
+Evidence Mapping
+----------------
+Baseline evidence:
+- project_evidence/baseline/urban_default.csv
+
+Secure packet-level evidence:
+- project_evidence/secure/secure_meaningful.csv
+
+Handover evidence:
+- project_evidence/handover/handover_meaningful.csv
+- project_evidence/handover/handover_meaningful_events.csv
+
+Adaptive trust / blockchain evidence:
+- project_evidence/adaptive/adaptive_default.csv
+- project_evidence/adaptive/adaptive_default_events.csv
+
+Integrated framework evidence:
+- project_evidence/integrated/final_valid_comm.csv
+- project_evidence/integrated/final_bc_cache_on.csv
+- project_evidence/integrated/final_bc_cache_on_events.csv
+- project_evidence/integrated/final_privacy_meaningful.csv
+- project_evidence/integrated/final_privacy_meaningful_events.csv
+
+Safe Paper Wording
+------------------
+The complete framework is primarily represented by the integrated
+secure_trust_blockchain_v2x.cc scenario, while baseline, secure-only,
+handover-focused, and adaptive-support scenarios are used as supporting
+evaluation references for isolated behaviors.

@@ -1,0 +1,34 @@
+Final Visual Assets List
+========================
+
+This note records the target visual assets that should exist before full
+paper drafting begins.
+
+Target Diagram Assets
+---------------------
+- overall architecture
+- threat model
+- message validation flow
+- handover decision flow
+- trust freshness flow
+- blockchain continuity workflow
+- formal authentication sequence
+
+Target Result Figures
+---------------------
+- baseline communication figure
+- secure communication figure
+- handover figure
+- adaptive/blockchain figure
+- integrated cache-enabled figure
+- integrated privacy-aware figure
+
+Supporting Assets
+-----------------
+- algorithm text boxes from docs/algorithms/
+- selected implementation screenshots
+- curated evidence screenshots if needed for viva or appendix
+
+Readiness Rule
+--------------
+Paper drafting should use only this finalized visual map.

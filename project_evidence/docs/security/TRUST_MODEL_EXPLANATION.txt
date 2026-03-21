@@ -1,0 +1,110 @@
+Trust Model Explanation
+=======================
+
+Purpose
+-------
+This document explains what "trust" means in the project, how it is used,
+and how it affects secure V2X operation.
+
+What Trust Means Here
+---------------------
+In this project, trust is an operational score used to guide security and
+handover decisions.
+
+It is not presented as:
+- a formal reputation proof
+- a human trust concept
+- a universal security guarantee
+
+Instead, trust is used as a practical control signal inside the simulated
+V2X framework.
+
+Role of Trust in the Framework
+------------------------------
+Trust connects packet-level observations with higher-level control behavior.
+
+It helps answer questions such as:
+- Should this vehicle be treated as reliable?
+- Should the next RSU handover use FAST or FULL authentication?
+- Should the vehicle be denied when its behavior looks unsafe?
+
+Trust Evidence Sources
+----------------------
+Trust is influenced by observed behavior in the system, including:
+
+- successful validated communication behavior
+- replay-related suspicious behavior
+- tampered / invalid-signature style behavior
+- malicious or suspicious reporting patterns
+- infrastructure-side trust context when enabled
+- freshness of previously stored trust information
+
+This means trust is not static.
+It changes according to observed communication behavior and decision history.
+
+Trust as Decision Input
+-----------------------
+The trust score is mainly used during RSU handover.
+
+The framework applies three outcomes:
+
+- FAST authentication
+- FULL authentication
+- REJECT
+
+Typical interpretation:
+- high and fresh trust -> FAST
+- moderate or stale trust -> FULL
+- low trust -> REJECT
+
+Trust Freshness
+---------------
+Trust is not used blindly.
+
+Even if a vehicle had a good previous trust score, that score may become less
+useful if it is too old.
+
+For this reason, the framework also considers trust freshness or staleness.
+
+Meaning:
+- fresh trust can support quick handover
+- stale trust should trigger stronger checking
+- outdated trust should not automatically justify FAST authentication
+
+Why Trust Is Important
+----------------------
+Packet validation alone is not enough in a dynamic V2X setting.
+
+A packet may be syntactically valid but still come from a vehicle whose recent
+behavior is suspicious.
+
+Trust therefore adds a second layer of protection:
+- packet-level filtering handles clearly invalid traffic
+- trust-level control handles uncertain or suspicious behavior over time
+
+Relation to Blockchain Support
+------------------------------
+When blockchain-assisted trust continuity is enabled, trust can be supported
+across RSU regions through commit/query behavior and local cache support.
+
+This does not mean the blockchain makes the system automatically secure.
+
+Its role is narrower:
+- preserve trust continuity
+- reduce repeated re-learning across RSUs
+- support continuity when local trust is missing or stale
+
+Relation to Privacy
+-------------------
+Privacy mechanisms such as pseudonym rotation may reduce linkability, but they
+can also complicate trust continuity.
+
+This is why trust and privacy are evaluated together in the project rather than
+as isolated features.
+
+Safe Paper Wording
+------------------
+In this work, trust is used as an operational decision variable derived from
+observed communication behavior and freshness conditions. It guides handover
+control by selecting FAST, FULL, or REJECT behavior rather than serving as a
+standalone formal proof of security.

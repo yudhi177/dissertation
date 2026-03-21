@@ -1,0 +1,122 @@
+Result Validation Notes
+=======================
+
+Purpose
+-------
+This note fixes the result-validation boundary before manuscript drafting.
+
+Source-of-Truth Rule
+--------------------
+Use the categorized evidence files as the canonical source of numbers:
+
+- baseline/urban_default.csv
+- secure/secure_meaningful.csv
+- handover/handover_meaningful.csv
+- handover/handover_meaningful_events.csv
+- adaptive/adaptive_default.csv
+- adaptive/adaptive_default_events.csv
+- integrated/final_valid_comm.csv
+- integrated/final_bc_cache_on.csv
+- integrated/final_bc_cache_on_events.csv
+- integrated/final_privacy_meaningful.csv
+- integrated/final_privacy_meaningful_events.csv
+- formal/v2x_handover_auth_result.txt
+- formal/v2x_handover_auth_secure_result.txt
+- formal/v2x_handover_auth_final_result.txt
+
+Important Note on Duplicates
+----------------------------
+Some files also appear inside integrated/ as archived mixed copies from the
+paper_evidence collection.
+
+For manuscript numbers, prefer the categorized folders:
+- baseline/
+- secure/
+- handover/
+- adaptive/
+- formal/
+
+Use integrated/ mainly for end-to-end scenario evidence and archived mixed copies.
+
+Major Result Areas to Recheck Before Writing
+--------------------------------------------
+
+1. Baseline Communication
+- confirm txCount
+- confirm rxCount
+- confirm pdr
+- confirm avgDelay_s
+- confirm throughput_bps
+
+2. Secure Communication
+- confirm replayDrops
+- confirm secure pdr
+- confirm delay impact
+- confirm throughput impact
+- verify secure filtering is described as simulation evidence, not full crypto proof
+
+3. Handover Results
+- confirm handoverCount
+- confirm avgHandoverDelay_s
+- verify FAST / FULL / REJECT explanation matches handover logic notes
+- verify event trace is used only as supporting evidence
+
+4. Adaptive / Blockchain Evidence
+- confirm avgAdaptiveTrust
+- confirm ledgerConsistency
+- confirm reportsSent
+- confirm reportsCommitted
+- confirm blocks
+- confirm avgBlockLatency
+- avoid claiming production blockchain realism
+
+5. Integrated Scenarios
+- confirm final_valid_comm summary values
+- confirm blockchain cache-enabled values
+- confirm privacy-aware values
+- confirm event traces support the scenario statements
+
+6. Formal Verification
+- baseline model must be described as insecure
+- intermediate model must be described as improved but incomplete
+- final model must be described using bounded Scyther wording only
+
+Safe Interpretation Rule
+------------------------
+Every major result must answer all four questions:
+
+- what happened
+- why it happened
+- why it matters
+- what should not be overclaimed
+
+Common Validation Risks
+-----------------------
+Do not:
+- mix categorized and archived duplicate files in one table
+- use different values for the same scenario across text and tables
+- report unsupported units
+- turn empirical privacy evidence into formal anonymity claims
+- generalize Scyther results to the full architecture
+
+Pre-Writing Numeric Discipline
+------------------------------
+Before writing the paper:
+- extract final numbers from canonical files only
+- keep one master number sheet
+- keep one wording sheet for safe interpretation
+- use claim-to-evidence mapping to justify every strong statement
+
+Minimal Safe Claims Supported by Current Evidence
+-------------------------------------------------
+- baseline V2X communication was established in simulation
+- secure receive path improved resilience against replayed and invalid traffic
+- trust-guided handover supports FAST / FULL / REJECT control
+- blockchain support assists trust continuity and can be evaluated with cache-related overhead
+- privacy support is empirical and based on pseudonym / linkability reduction behavior
+- the modeled handover-authentication subprotocol satisfies intended Scyther claims within analysis bounds
+
+Conclusion
+----------
+The manuscript should only use numbers and statements that can be traced back
+to canonical evidence files and safe-scope security wording.

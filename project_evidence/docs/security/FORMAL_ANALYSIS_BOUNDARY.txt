@@ -1,0 +1,55 @@
+Formal Analysis Boundary
+========================
+
+Tool Used
+---------
+Scyther
+
+What Is Formally Analyzed
+-------------------------
+Only the handover authentication subprotocol is formally modeled and checked.
+
+Model Evolution
+---------------
+1. Initial baseline authentication model
+   - insecure
+   - multiple secrecy/agreement claims fail
+
+2. Intermediate secure model
+   - stronger identity binding and signed/encrypted payloads
+   - most claims pass, but initiator-side agreement/synchronization remains incomplete
+
+3. Final authenticated model
+   - adds responder freshness and explicit final acknowledgement
+   - target claims pass within Scyther analysis bounds
+
+Claims Supported by Formal Analysis
+-----------------------------------
+- secrecy of modeled handover token/material inside the final protocol model
+- aliveness
+- weak agreement
+- non-injective agreement
+- synchronization
+
+What Is NOT Formally Claimed
+----------------------------
+- full proof of the complete V2X framework
+- proof of the blockchain subsystem
+- proof of the full trust engine
+- proof of privacy / anonymity properties
+- CK / eCK proof
+- full Dolev-Yao proof over the whole architecture
+
+Safe Paper Wording
+------------------
+The paper may state that the handover authentication subprotocol was modeled
+in Scyther and that the final protocol variant satisfied the intended secrecy,
+aliveness, agreement, and synchronization claims within the analysis bounds.
+
+Unsafe Wording
+--------------
+Do not state:
+- the whole framework is formally proven secure
+- the full system satisfies CK / eCK security
+- the complete architecture is proven under Dolev-Yao
+- privacy is formally proven

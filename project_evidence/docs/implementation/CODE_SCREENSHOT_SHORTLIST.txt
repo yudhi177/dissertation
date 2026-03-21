@@ -1,0 +1,103 @@
+Code Screenshot Shortlist
+=========================
+
+Purpose
+-------
+This note defines which code regions are worth capturing as curated
+implementation screenshots for the dissertation or paper.
+
+Important Rule
+--------------
+Do not include large or cluttered screenshots.
+Only capture small, readable, reviewer-relevant code blocks.
+
+Recommended Screenshot Set
+--------------------------
+
+1. Receive Path Validation Block
+What to capture:
+- packet reception entry
+- replay check
+- invalid / tamper / signature-style rejection path
+Why:
+- shows packet-level security logic
+
+2. Replay Filtering Block
+What to capture:
+- replay cache lookup
+- replay drop condition
+- replay-related counter update
+Why:
+- directly supports replay-defense explanation
+
+3. Trust Update Block
+What to capture:
+- trust score update logic
+- suspicious / malicious effect on trust
+Why:
+- connects attack behavior to trust control
+
+4. Handover Decision Block
+What to capture:
+- trust threshold comparison
+- freshness check
+- FAST / FULL / REJECT branch
+Why:
+- this is one of the most important implementation screenshots
+
+5. Blockchain / Cache Lookup Block
+What to capture:
+- trust lookup path
+- cache hit / miss behavior if visible
+- update / query abstraction
+Why:
+- clarifies why blockchain support exists in the implementation
+
+6. Privacy Rotation Block
+What to capture:
+- pseudonym rotation trigger or handling logic
+Why:
+- supports privacy-mechanism explanation
+
+7. Logging / Metrics Output Block
+What to capture:
+- CSV writing
+- key metric fields
+Why:
+- proves where reported metrics come from
+
+8. Attack Injection / Attack Mode Block
+What to capture:
+- replay enable
+- malicious mode
+- tamper / invalid-path trigger if present
+Why:
+- supports attacker implementation credibility
+
+Screenshot Quality Rules
+------------------------
+Each screenshot should:
+- show file name
+- show only one meaningful code region
+- avoid tiny fonts
+- avoid terminal clutter
+- be readable in grayscale print if needed
+
+Do Not Screenshot
+-----------------
+Avoid screenshots of:
+- very long files without focus
+- generic includes / boilerplate
+- repeated helper code with no paper value
+- blocks that are not actually discussed in the manuscript
+
+How These Screenshots Will Be Used
+----------------------------------
+These screenshots are supporting implementation evidence only.
+They should not replace algorithm descriptions or result evidence.
+
+Safe Paper Wording
+------------------
+Selected implementation screenshots may be included to illustrate the
+receive-validation path, trust-guided handover logic, blockchain-assisted
+trust lookup, and logging structure.

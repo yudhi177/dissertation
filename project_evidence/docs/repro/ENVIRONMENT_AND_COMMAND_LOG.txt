@@ -1,0 +1,84 @@
+Environment and Command Log
+===========================
+
+Environment Snapshot
+--------------------
+Date: Sat Mar 21 06:49:55 UTC 2026
+User: yudhishthar
+Host: Yudhishthar
+Kernel: Linux 6.6.87.2-microsoft-standard-WSL2 x86_64 GNU/Linux
+Working directory: /home/yudhishthar/dissertation
+
+OS:
+Ubuntu 24.04.1 LTS
+
+Compiler / Language Versions
+----------------------------
+gcc: gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+g++: g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+python3: Python 3.12.3
+cmake: cmake version 3.28.3
+
+Git Snapshot
+------------
+dissertation repo commit: 6d8fce2
+dissertation repo branch: main
+
+ns-3 repo commit: 65e7fab3f
+ns-3 repo branch: master
+
+Important Tooling
+-----------------
+Scyther binary: present
+zip: present
+tar: tar (GNU tar) 1.35
+
+Canonical Evidence Review Order
+-------------------------------
+1. project_evidence/baseline/urban_default.csv
+2. project_evidence/secure/secure_meaningful.csv
+3. project_evidence/handover/handover_meaningful.csv
+4. project_evidence/handover/handover_meaningful_events.csv
+5. project_evidence/adaptive/adaptive_default.csv
+6. project_evidence/adaptive/adaptive_default_events.csv
+7. project_evidence/integrated/final_valid_comm.csv
+8. project_evidence/integrated/final_bc_cache_on.csv
+9. project_evidence/integrated/final_bc_cache_on_events.csv
+10. project_evidence/integrated/final_privacy_meaningful.csv
+11. project_evidence/integrated/final_privacy_meaningful_events.csv
+12. project_evidence/formal/v2x_handover_auth_final_result.txt
+
+Representative Command Log
+--------------------------
+[A] Build Scyther
+cd ~/dissertation/scyther
+make clean
+make
+make test
+
+[B] Run final Scyther protocol model
+cd ~/dissertation/scyther
+./gui/Scyther/scyther-linux \
+  ~/dissertation/formal_analysis/scyther/v2x_handover_auth_final.spdl \
+  > ~/dissertation/formal_analysis/scyther/results/v2x_handover_auth_final_result.txt 2>&1
+
+[C] Prepare integrated evidence copy
+cd ~/ns-3
+mkdir -p results/paper_evidence
+cp results/baseline_runs/urban_default.csv results/paper_evidence/
+cp results/secure_runs/secure_meaningful.csv results/paper_evidence/
+cp results/handover_runs/handover_meaningful.csv results/paper_evidence/
+cp results/handover_runs/handover_meaningful_events.csv results/paper_evidence/
+cp results/adaptive_runs/adaptive_default.csv results/paper_evidence/
+cp results/adaptive_runs/adaptive_default_events.csv results/paper_evidence/
+cp results/final_integrated_runs/final_valid_comm.csv results/paper_evidence/
+cp results/final_integrated_runs/final_bc_cache_on.csv results/paper_evidence/
+cp results/final_integrated_runs/final_bc_cache_on_events.csv results/paper_evidence/
+cp results/final_integrated_runs/final_privacy_meaningful.csv results/paper_evidence/
+cp results/final_integrated_runs/final_privacy_meaningful_events.csv results/paper_evidence/
+
+[D] Build final release bundle
+cd ~/dissertation
+tar -czf release_bundle/project_evidence_bundle.tar.gz project_evidence
+zip -r release_bundle/project_evidence_bundle.zip project_evidence
+sha256sum release_bundle/project_evidence_bundle.tar.gz release_bundle/project_evidence_bundle.zip > release_bundle/ARCHIVE_CHECKSUMS.txt

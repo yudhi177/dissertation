@@ -1,0 +1,65 @@
+Novelty and Positioning Pack
+============================
+
+Project Position
+----------------
+This work should be positioned as an implementation-backed simulation study
+of secure trust-based V2X communication with blockchain-assisted trust
+continuity and privacy-aware operation.
+
+One-Line Positioning
+--------------------
+An implementation-backed ns-3 study of secure trust-based V2X communication
+that combines packet validation, trust-guided RSU handover, blockchain-assisted
+trust continuity, and privacy-aware operation under simulated attack conditions.
+
+Three-Line Positioning
+----------------------
+The project does not present a generic blockchain-heavy V2X proposal.
+Instead, it studies how replay-aware packet validation, trust-guided
+FAST/FULL/REJECT handover, and compact blockchain-assisted trust continuity
+can work together in a mobility-aware simulated environment.
+
+Why This Is Strong
+------------------
+The strength of the work is not that every component is individually new.
+The strength is that the project integrates:
+- packet-level security filtering
+- trust-guided handover control
+- continuity support across RSUs
+- cache-aware blockchain-assisted lookup
+- optional privacy-aware operation
+- formal analysis of the handover authentication subprotocol
+
+Safe Novelty Statement
+----------------------
+The novelty lies in the integrated evaluation of security filtering,
+trust-guided handover, blockchain-assisted trust continuity, and privacy-aware
+operation in a single implementation-backed ns-3 framework, together with a
+bounded formal analysis of the handover authentication subprotocol.
+
+Reviewer-Friendly One-Paragraph Version
+---------------------------------------
+Unlike studies that isolate only authentication, only trust scoring, or only
+blockchain logging, this project evaluates how these mechanisms interact in a
+mobility-aware V2X setting. The framework uses message-level validation for
+replay and invalid-packet filtering, trust-guided FAST/FULL/REJECT handover
+decisions during RSU transition, and a compact blockchain-assisted continuity
+layer with cache support for trust-state retrieval. This gives the work a
+clear implementation-and-evaluation focus rather than a purely conceptual one.
+
+Viva-Style Answer
+-----------------
+What is new is not a claim of inventing blockchain or trust for V2X in
+isolation. The contribution is that the project operationalizes them together:
+security filtering at the packet path, trust-based control at handover, and
+continuity support across RSUs using a compact blockchain-assisted lookup
+mechanism, then evaluates the trade-offs under simulated attacks and mobility.
+
+Do Not Claim
+------------
+- full end-to-end formal proof of the whole framework
+- production-ready blockchain platform
+- CK or eCK proof
+- full Dolev-Yao proof of the complete architecture
+- formal anonymity proof

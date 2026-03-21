@@ -1,0 +1,16 @@
+Safe Security Claims
+====================
+- The framework improves resilience against replayed and invalid packets in the simulated environment.
+- Trust-guided handover supports safer FAST/FULL/REJECT decisions under mobility.
+- Blockchain support is used for trust continuity assistance, not as a generic hype component.
+- Privacy support is empirical and based on pseudonym rotation / reduced linkability.
+- The final handover authentication subprotocol satisfies key Scyther claims within analysis bounds.
+
+Unsafe Claims
+=============
+- full protocol formally proven secure
+- production-ready blockchain architecture
+- CK / eCK secure
+- full Dolev-Yao secure system
+- formally proven anonymity
+- deployment-grade cryptographic benchmark realism unless separately measured

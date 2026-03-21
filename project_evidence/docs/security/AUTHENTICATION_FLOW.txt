@@ -1,0 +1,87 @@
+Authentication Flow
+===================
+
+Purpose
+-------
+This note explains how authentication is handled in the project at both
+message level and handover level.
+
+Two Authentication Layers
+-------------------------
+1. Message-level validation
+2. Handover-time authentication selection
+
+1. Message-Level Validation
+---------------------------
+For normal V2X packet processing, the receiver follows a validation path
+before accepting a packet for further use.
+
+The validation logic includes:
+- replay filtering
+- signature / tamper / invalid-packet checking
+- packet rejection when validation fails
+
+Meaning:
+- replayed packets are dropped by replay-defense logic
+- malformed or invalid-signature packets are rejected
+- only validated packets contribute to trusted communication flow
+
+This provides packet-level authenticity and integrity filtering inside the
+simulated environment.
+
+2. Handover-Time Authentication
+-------------------------------
+When a vehicle moves between RSU regions, the system does not use the same
+decision rule as ordinary packet reception.
+
+Instead, the framework applies a trust-guided handover authentication choice:
+- FAST authentication
+- FULL authentication
+- REJECT
+
+This decision is based on:
+- current trust score
+- trust freshness / staleness
+- configured trust thresholds
+
+Interpretation
+--------------
+Normal packet security answers:
+"Should this received packet be accepted or dropped?"
+
+Handover authentication answers:
+"How safely and how quickly should this vehicle be re-authenticated during
+RSU transition?"
+
+Operational View
+----------------
+The full authentication story is therefore split into two parts:
+
+A. Packet path
+   receive packet
+   -> replay check
+   -> signature / validity check
+   -> accept or drop
+
+B. Handover path
+   vehicle approaches new RSU / handover point
+   -> evaluate trust score and freshness
+   -> choose FAST or FULL or REJECT
+   -> continue, re-authenticate, or deny
+
+Design Rationale
+----------------
+This split is important because secure V2X communication requires both:
+- packet-level protection against invalid traffic
+- mobility-aware authentication control during handover
+
+In this project, authentication is therefore not only a cryptographic-style
+validation concept, but also a trust-guided control decision during RSU
+transition.
+
+Safe Paper Wording
+------------------
+The framework uses two complementary authentication layers: message-level
+validation for replay and invalid-packet filtering, and trust-guided
+handover-time authentication for selecting FAST, FULL, or REJECT decisions
+during RSU transitions.

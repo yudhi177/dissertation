@@ -1,0 +1,74 @@
+file_path,category,description
+project_evidence/baseline/urban_default.csv,baseline,Baseline VANET communication result
+project_evidence/secure/secure_meaningful.csv,secure,Secure communication with replay protection evidence
+project_evidence/handover/handover_meaningful.csv,handover,Trust-based RSU handover summary
+project_evidence/handover/handover_meaningful_events.csv,handover,FAST handover event trace
+project_evidence/adaptive/adaptive_default.csv,adaptive,Adaptive trust and blockchain summary
+project_evidence/adaptive/adaptive_default_events.csv,adaptive,Adaptive trust event trace
+project_evidence/integrated/final_valid_comm.csv,integrated,Integrated valid communication scenario
+project_evidence/integrated/final_bc_cache_on.csv,integrated,Integrated blockchain cache-enabled scenario
+project_evidence/integrated/final_bc_cache_on_events.csv,integrated,Integrated blockchain cache-enabled event trace
+project_evidence/integrated/final_privacy_meaningful.csv,integrated,Integrated privacy-aware scenario summary
+project_evidence/integrated/final_privacy_meaningful_events.csv,integrated,Integrated privacy-aware event trace
+project_evidence/formal/v2x_handover_auth.spdl,formal,Initial insecure Scyther protocol model
+project_evidence/formal/v2x_handover_auth_result.txt,formal,Scyther result for insecure protocol
+project_evidence/formal/v2x_handover_auth_secure.spdl,formal,Intermediate secure Scyther protocol model
+project_evidence/formal/v2x_handover_auth_secure_result.txt,formal,Scyther result for intermediate secure model
+project_evidence/formal/v2x_handover_auth_final.spdl,formal,Final authenticated and synchronized Scyther protocol model
+project_evidence/formal/v2x_handover_auth_final_result.txt,formal,Scyther result for final verified model
+project_evidence/formal/README.txt,formal,Explanation of formal verification evidence
+project_evidence/docs/security/THREAT_MODEL.txt,docs,Final threat model for secure trust-based V2X system
+project_evidence/docs/security/ATTACK_IMPLEMENTATION_MATRIX.csv,docs,Attack capability to metric mapping
+project_evidence/docs/security/FORMAL_ANALYSIS_BOUNDARY.txt,docs,Formal verification scope and limits
+project_evidence/docs/security/SAFE_SECURITY_CLAIMS.txt,docs,Safe versus unsafe security claims
+project_evidence/docs/security/SECURITY_POSITIONING_SUMMARY.txt,docs,Reviewer-friendly security positioning summary
+project_evidence/docs/security/BLOCKCHAIN_TECHNICAL_WORKFLOW.txt,docs,Technical workflow of blockchain-assisted trust continuity
+project_evidence/docs/security/BLOCKCHAIN_TECHNICAL_WORKFLOW.txt,docs,Technical workflow of blockchain-assisted trust continuity
+project_evidence/docs/security/BLOCKCHAIN_DATA_MODEL_AND_HASH_SHARING.txt,docs,Blockchain data model and hash-sharing clarification note
+project_evidence/docs/security/TRUST_FRESHNESS_AND_STALENESS.txt,docs,Trust freshness and staleness explanation for handover decisions
+project_evidence/docs/security/BLOCKCHAIN_WORKFLOW_AND_QUERY_PATH.txt,docs,Operational blockchain workflow and query path clarification note
+project_evidence/docs/algorithms/ALGORITHM_PACK_README.txt,docs,Algorithm pack overview for method and implementation explanation
+project_evidence/docs/algorithms/RECEIVE_VALIDATE_ALGORITHM.txt,docs,Conceptual packet receive-and-validate algorithm aligned with implementation
+project_evidence/docs/algorithms/HANDOVER_DECISION_ALGORITHM.txt,docs,Conceptual FAST FULL REJECT handover decision algorithm aligned with implementation
+project_evidence/docs/algorithms/BLOCKCHAIN_LOOKUP_ALGORITHM.txt,docs,Conceptual blockchain-assisted trust lookup algorithm with cache-aware continuity support
+project_evidence/docs/implementation/CODE_SCREENSHOT_SHORTLIST.txt,docs,Curated shortlist of implementation code screenshots for paper evidence
+project_evidence/docs/implementation/IMPLEMENTATION_MODULE_TO_CODE_MAP.csv,docs,Conceptual module to scenario-file mapping for implementation-backed paper section
+project_evidence/docs/implementation/PARAMETER_AUDIT_TABLE.csv,docs,Pre-paper audit of major runtime parameters and their expected system impact
+project_evidence/docs/implementation/PRIMARY_SUPPORTING_SCENARIO_MAP.txt,docs,Primary versus supporting scenario map for implementation-backed paper positioning
+project_evidence/docs/repro/ENVIRONMENT_AND_COMMAND_LOG.txt,docs,Environment snapshot and representative command log for reproducibility
+project_evidence/docs/screenshots/SCREENSHOT_SHORTLIST.txt,docs,Curated shortlist of implementation and evidence screenshots to capture
+project_evidence/docs/figures/FIGURE_TABLE_MAP.txt,docs,Final pre-writing map of figures and tables to prepare
+project_evidence/docs/results/RESULT_VALIDATION_NOTES.txt,docs,Result validation boundary and safe interpretation notes before manuscript drafting
+project_evidence/docs/results/MASTER_CLAIM_RECHECKLIST.csv,docs,Master claim recheck checklist linking claims to final evidence before writing
+project_evidence/docs/implementation/IMPLEMENTATION_AUDIT_SUMMARY.txt,docs,Implementation-facing audit summary for the pre-paper evidence pack
+project_evidence/docs/implementation/CODE_SCREENSHOT_SHORTLIST.txt,docs,Curated shortlist of important code screenshots for manuscript support
+project_evidence/docs/implementation/PRIMARY_AND_SUPPORTING_SCENARIOS.txt,docs,Clarifies primary integrated scenario versus supporting focused scenarios
+project_evidence/docs/results/RESULT_VALIDATION_SUMMARY.txt,docs,Result validation boundary and manuscript-safe interpretation summary
+project_evidence/docs/results/CLAIM_METRIC_ALIGNMENT.csv,docs,Claim to metric alignment for final manuscript-safe reporting
+project_evidence/docs/results/RESULT_INTERPRETATION_NOTES.txt,docs,Short interpretation notes for each evidence layer before drafting
+project_evidence/docs/repro/ENVIRONMENT_SNAPSHOT.txt,docs,Environment snapshot for reproducibility and review context
+project_evidence/docs/repro/KNOWN_COMMAND_LOG.txt,docs,Known validated command log for formal analysis and evidence packaging
+project_evidence/docs/repro/REPRODUCTION_ENTRYPOINTS.txt,docs,Canonical evidence entrypoints and reproduction review order
+project_evidence/docs/figures/FIGURE_MAP.csv,docs,Final pre-drafting figure map for diagrams and result visuals
+project_evidence/docs/figures/DIAGRAM_IMPROVEMENT_QUEUE.txt,docs,Priority queue for improving final paper diagrams
+project_evidence/docs/figures/FINAL_VISUAL_ASSETS_LIST.txt,docs,Target final visual asset list before manuscript drafting
+project_evidence/docs/tables/FINAL_TABLE_MAP.csv,docs,Final map of manuscript tables to be built before drafting
+project_evidence/docs/writing_prep/TERMINOLOGY_CONSISTENCY_SHEET.txt,docs,Frozen terminology sheet for consistent manuscript wording
+project_evidence/docs/writing_prep/FINAL_CONTRIBUTIONS.txt,docs,Final five manuscript contributions fixed before drafting
+project_evidence/docs/writing_prep/LIMITATIONS_AND_SAFE_CLAIMS.txt,docs,Frozen limitations and safe-claims sheet for reviewer-safe writing
+project_evidence/docs/screenshots/SCREENSHOT_PACK_PLAN.txt,docs,Planned screenshot categories and usage rules for appendix or viva support
+project_evidence/docs/screenshots/CODE_SCREENSHOT_SHORTLIST.txt,docs,Curated shortlist of code and terminal screenshots for implementation evidence
+project_evidence/docs/final_readiness/PRE_PAPER_FINAL_READINESS.txt,docs,Overall pre-paper readiness summary before manuscript drafting
+project_evidence/docs/final_readiness/REMAINING_BEFORE_DRAFTING.txt,docs,Minimal remaining practical items before starting manuscript drafting
+project_evidence/docs/related_work/NOVELTY_POSITIONING_PACK.txt,docs,Reviewer-friendly novelty and positioning pack for manuscript writing
+project_evidence/docs/related_work/PRIOR_WORK_COMPARISON_TEMPLATE.csv,docs,Fillable prior-work comparison template for related-work section
+project_evidence/docs/related_work/RELATED_WORK_BUCKETS.txt,docs,Final related-work bucketization guide for paper preparation
+project_evidence/docs/figures/FINAL_FIGURE_SPECIFICATIONS.txt,docs,Final map and purpose of manuscript figures before drafting
+project_evidence/docs/figures/DIAGRAM_REDRAW_CHECKLIST.txt,docs,Checklist for exporting publication-ready diagrams
+project_evidence/docs/screenshots/SCREENSHOT_CAPTURE_LOG.csv,docs,Planned screenshot capture log for code and terminal evidence
+project_evidence/docs/screenshots/SCREENSHOT_CAPTURE_RULES.txt,docs,Rules for capturing appendix or viva-quality screenshots
+project_evidence/docs/writing_prep/SECTION_INPUT_MAP.txt,docs,Section-by-section source map for manuscript drafting
+project_evidence/docs/final_readiness/ABSOLUTE_LAST_PREP_CHECKLIST.txt,docs,Absolute last pre-paper manual checklist before drafting
+project_evidence/docs/final_readiness/MANUAL_TASK_EXECUTION_ORDER.txt,docs,Ordered execution sequence for the final manual pre-paper tasks
+project_evidence/docs/final_readiness/PAPER_START_GATE.txt,docs,Final gate check before manuscript drafting begins
+project_evidence/docs/final_readiness/FINAL_PROJECT_STATUS.txt,docs,Final overall project status before paper drafting

@@ -1,0 +1,36 @@
+Paper Start Gate
+================
+
+Pre-Paper Documentation Status
+------------------------------
+[OK] evidence bundle prepared
+[OK] manifest and checksums prepared
+[OK] reproducibility notes prepared
+[OK] audit notes prepared
+[OK] security positioning prepared
+[OK] threat model prepared
+[OK] attack matrix prepared
+[OK] authentication flow prepared
+[OK] handover rules prepared
+[OK] blockchain clarification prepared
+[OK] trust freshness clarification prepared
+[OK] formal verification boundary prepared
+[OK] algorithm pack prepared
+[OK] table map prepared
+[OK] figure specification pack prepared
+[OK] terminology sheet prepared
+[OK] final contributions prepared
+[OK] limitations and safe claims prepared
+[OK] novelty positioning pack prepared
+[OK] section input map prepared
+
+Still Manual
+------------
+[ ] prior-work comparison table fill
+[ ] final diagram export
+[ ] final screenshot capture
+
+Decision
+--------
+The project is ready to move into manuscript drafting once the three manual
+items above are completed.

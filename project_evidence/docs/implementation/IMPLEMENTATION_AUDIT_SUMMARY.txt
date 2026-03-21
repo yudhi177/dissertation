@@ -1,0 +1,100 @@
+Implementation Audit Summary
+============================
+
+Purpose
+-------
+This note fixes the implementation-facing description of the project before
+manuscript drafting.
+
+Primary Implementation Identity
+-------------------------------
+The project should be presented as an implementation-backed ns-3 simulation
+study of secure trust-based V2X communication with RSU-assisted handover,
+blockchain-assisted trust continuity, and optional privacy-aware behavior.
+
+Primary Scenario File
+---------------------
+Primary integrated implementation logic is centered around the final
+integrated ns-3 scenario used for secure trust-based V2X evaluation.
+
+This primary implementation includes:
+- packet receive path
+- replay filtering
+- invalid / tampered packet filtering
+- trust update logic
+- RSU handover decision logic
+- blockchain / cache-assisted continuity support
+- privacy-related behavior where enabled
+- event logging and summary metrics
+
+Supporting Scenario Families
+----------------------------
+The project evidence should be read as a family of scenario layers:
+
+1. Baseline scenario
+   - basic communication evidence
+   - no strong security interpretation beyond baseline communication
+
+2. Secure scenario
+   - replay-aware / validation-aware receive path
+   - secure packet filtering evidence
+
+3. Handover scenario
+   - trust-guided FAST / FULL / REJECT behavior
+   - handover delay evidence
+
+4. Adaptive / blockchain scenario
+   - trust continuity and ledger-related evidence
+   - blockchain/cache overhead interpretation
+
+5. Integrated scenario
+   - end-to-end combined evidence
+   - communication + trust + handover + blockchain + privacy interaction
+
+Implementation Truth Rule
+-------------------------
+For manuscript writing, implementation claims must be tied to:
+- code behavior already present in ns-3 scenarios
+- generated CSV or event evidence
+- formal Scyther results only for the handover-authentication subprotocol
+
+Conceptual Module Map
+---------------------
+The implementation can be explained through the following conceptual modules:
+
+A. Receive-and-Validate Path
+- receives packet
+- checks replay conditions
+- checks invalid / tampered / signature-style conditions
+- accepts or drops packet
+- updates related counters
+
+B. Trust Engine
+- updates trust-related state
+- reacts to malicious behavior or suspicious communication
+- provides trust score used by handover logic
+
+C. Handover Decision Engine
+- checks trust score
+- checks trust freshness
+- selects FAST / FULL / REJECT
+
+D. Blockchain / Cache Continuity Support
+- stores or retrieves compact trust-continuity related state
+- supports handover-time trust availability
+- introduces measurable lookup/update overhead
+
+E. Privacy Support
+- applies pseudonym / rotation-oriented behavior where enabled
+- supports empirical linkability reduction claims only
+
+F. Logging and Metrics
+- writes summary CSVs
+- writes event traces where applicable
+- supports final evidence bundle
+
+Safe Implementation Wording
+---------------------------
+The manuscript should describe the project as an implementation-backed ns-3
+evaluation with layered scenario support, rather than as a production-ready
+full-stack deployment.

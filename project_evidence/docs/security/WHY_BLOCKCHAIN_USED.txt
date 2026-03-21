@@ -1,0 +1,95 @@
+Why Blockchain Is Used
+======================
+
+Purpose
+-------
+This document explains why the project uses a blockchain-assisted component
+and how that use should be presented safely in the dissertation and paper.
+
+Core Reason
+-----------
+The blockchain-assisted component is used to support trust continuity across
+RSUs during mobility.
+
+In this project, the blockchain is not introduced as a generic trend or
+hype element. Its role is specific and functional.
+
+Problem Without Blockchain Support
+----------------------------------
+In a purely local trust design, trust information may remain tied to the
+current observing RSU.
+
+This creates a continuity problem when a vehicle moves from one RSU region
+to another:
+
+- the next RSU may not have prior trust context
+- trust may need to be rebuilt from limited local observation
+- handover decisions may become slower or less informed
+- stale or missing trust history may reduce decision quality
+
+Why Blockchain-Assisted Support Helps
+-------------------------------------
+The blockchain-assisted path is used to make compact trust-related state
+available beyond a single local RSU.
+
+This supports:
+
+- trust continuity across infrastructure boundaries
+- tamper-evident recording of trust-related updates
+- better availability of prior trust context at handover time
+- less dependence on restarting trust from zero at each RSU boundary
+
+Operational Role
+----------------
+The blockchain-assisted layer does not replace packet validation,
+trust logic, or handover policy.
+
+Instead, it supports them by providing continuity-oriented trust lookup.
+
+The operational sequence is:
+
+- trust-related state is recorded in compact form
+- another RSU can later query or retrieve that state
+- cache support reduces repeated lookup cost
+- the target RSU still applies local freshness checks and thresholds
+- final handover decision remains FAST, FULL, or REJECT
+
+What This Project Does NOT Claim
+--------------------------------
+This project does not claim:
+
+- a full production blockchain deployment
+- a consensus-heavy real-world ledger implementation
+- full raw traffic storage on-chain
+- a complete decentralized economic model
+- blockchain as the only security mechanism
+
+So the blockchain should be described as a support layer for trust
+continuity, not as the main source of security by itself.
+
+Why It Matters in This Framework
+--------------------------------
+The project combines:
+
+- packet-level filtering
+- trust-guided handover control
+- mobility across RSU regions
+- optional privacy support
+
+In such a setting, continuity of trust information becomes important.
+
+The blockchain-assisted design helps preserve useful trust context during
+mobility while allowing cache-enabled evaluation of overhead.
+
+Reviewer-Friendly Positioning
+-----------------------------
+The blockchain component is included to address a specific continuity
+problem in RSU-based trust management: how to preserve and retrieve compact
+trust-related state when vehicles move between infrastructure regions.
+
+Safe Paper Wording
+------------------
+The blockchain-assisted layer is used to support trust continuity across
+RSUs by recording and retrieving compact trust-related state. In this
+framework, blockchain is a continuity-support mechanism rather than a
+generic or production-scale ledger claim.

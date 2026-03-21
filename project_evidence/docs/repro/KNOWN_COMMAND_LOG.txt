@@ -1,0 +1,61 @@
+Known Command Log
+=================
+
+Purpose
+-------
+This log preserves the canonical commands that are already validated and
+should be referenced during reproducibility discussion.
+
+1. Scyther Build and Test
+-------------------------
+cd ~/dissertation/scyther
+make clean
+make
+make test
+
+2. Scyther Formal Analysis Runs
+-------------------------------
+cd ~/dissertation/scyther
+
+./gui/Scyther/scyther-linux \
+  ~/dissertation/formal_analysis/scyther/v2x_handover_auth.spdl \
+  > ~/dissertation/formal_analysis/scyther/results/v2x_handover_auth_result.txt 2>&1
+
+./gui/Scyther/scyther-linux \
+  ~/dissertation/formal_analysis/scyther/v2x_handover_auth_secure.spdl \
+  > ~/dissertation/formal_analysis/scyther/results/v2x_handover_auth_secure_result.txt 2>&1
+
+./gui/Scyther/scyther-linux \
+  ~/dissertation/formal_analysis/scyther/v2x_handover_auth_final.spdl \
+  > ~/dissertation/formal_analysis/scyther/results/v2x_handover_auth_final_result.txt 2>&1
+
+3. Formal Evidence Collection
+-----------------------------
+cd ~/dissertation
+mkdir -p formal_analysis/scyther/results/final
+cp formal_analysis/scyther/*.spdl formal_analysis/scyther/results/final/
+cp formal_analysis/scyther/results/*result.txt formal_analysis/scyther/results/final/
+
+4. Evidence Bundle Packaging
+----------------------------
+cd ~/dissertation
+mkdir -p release_bundle
+tar -czf release_bundle/project_evidence_bundle.tar.gz project_evidence
+zip -r release_bundle/project_evidence_bundle.zip project_evidence >/dev/null
+sha256sum release_bundle/project_evidence_bundle.tar.gz \
+          release_bundle/project_evidence_bundle.zip \
+          > release_bundle/ARCHIVE_CHECKSUMS.txt
+
+5. Integrity Refresh
+--------------------
+cd ~/dissertation
+find project_evidence -maxdepth 3 -type f | sort > project_evidence/MASTER_FILE_LIST.txt
+find project_evidence -type f ! -name "CHECKSUMS.txt" -exec sha256sum {} \; | sort > project_evidence/CHECKSUMS.txt
+
+Boundary Note
+-------------
+This command log preserves validated formal-analysis, evidence-assembly,
+and packaging commands.
+
+The simulation result files themselves are treated as the final experimental
+source-of-truth in the categorized evidence folders.

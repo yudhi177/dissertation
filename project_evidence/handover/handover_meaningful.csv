@@ -1,0 +1,2 @@
+nVehicles,simTime,rsuSeparation,vehicleSpeed,checkMs,fullAuthMs,fastReauthMs,initialTrust,trustThreshold,trustDecayPerSec,feedbackInterval,feedbackDelta,handoverCount,avgHandoverDelay_s
+30,80,180,18,100,120,20,0.8,0.6,0.003,10,0.02,2,0.02

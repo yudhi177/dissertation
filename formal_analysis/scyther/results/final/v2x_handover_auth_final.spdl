@@ -1,0 +1,48 @@
+protocol V2XHandoverAuthFinal(V,R)
+{
+  role V
+  {
+    fresh Nv: Nonce;
+    var Nr: Nonce;
+    var Ns: Nonce;
+    fresh Tv: Nonce;
+
+    send_1(V,R, V, Nv);
+    recv_2(R,V, R, Nr);
+
+    send_3(V,R, {V,R,Nv,Nr,Tv,{V,R,Nv,Nr,Tv}sk(V)}pk(R));
+
+    recv_4(R,V, {R,V,Nv,Nr,Ns,Tv,{R,V,Nv,Nr,Ns,Tv}sk(R)}pk(V));
+
+    send_5(V,R, {V,R,Nv,Nr,Ns,{V,R,Nv,Nr,Ns}sk(V)}pk(R));
+
+    claim(V,Secret,Tv);
+    claim(V,Alive);
+    claim(V,Weakagree);
+    claim(V,Niagree);
+    claim(V,Nisynch);
+  }
+
+  role R
+  {
+    var Nv: Nonce;
+    fresh Nr: Nonce;
+    fresh Ns: Nonce;
+    var Tv: Nonce;
+
+    recv_1(V,R, V, Nv);
+    send_2(R,V, R, Nr);
+
+    recv_3(V,R, {V,R,Nv,Nr,Tv,{V,R,Nv,Nr,Tv}sk(V)}pk(R));
+
+    send_4(R,V, {R,V,Nv,Nr,Ns,Tv,{R,V,Nv,Nr,Ns,Tv}sk(R)}pk(V));
+
+    recv_5(V,R, {V,R,Nv,Nr,Ns,{V,R,Nv,Nr,Ns}sk(V)}pk(R));
+
+    claim(R,Secret,Tv);
+    claim(R,Alive);
+    claim(R,Weakagree);
+    claim(R,Niagree);
+    claim(R,Nisynch);
+  }
+}

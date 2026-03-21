@@ -1,0 +1,103 @@
+Hash and Trust Sharing Explanation
+==================================
+
+Purpose
+-------
+This document explains what is actually shared through the blockchain-assisted
+trust continuity path, and what is not shared.
+
+Why This Clarification Is Important
+-----------------------------------
+In review or viva discussion, a common question is:
+"What exactly is stored or shared through the blockchain layer?"
+
+This project should answer that clearly.
+
+What Is Shared
+--------------
+The blockchain-assisted path is used to support trust continuity across RSUs.
+
+The shared information should be understood as compact trust-related state,
+not full raw communication history.
+
+In safe project wording, the shared state may include:
+
+- vehicle identifier reference or pseudonym-linked reference
+- compact trust score or trust state
+- timestamp
+- report or event summary marker
+- integrity-oriented record reference
+
+This means the system shares trust continuity information, not all packet data.
+
+What Is Not Shared
+------------------
+The project does not claim that the following are fully stored on-chain:
+
+- all raw V2X packets
+- full sensor or message payload history
+- complete behavioral logs
+- full privacy-sensitive identity history
+- full blockchain ledger semantics of a production deployment
+
+So the blockchain-assisted path should be presented as a compact support layer.
+
+Meaning of Hash-Style Sharing
+-----------------------------
+When explaining "hash sharing", the safest interpretation is:
+
+- the system uses compact record-style information
+- the stored or referenced value acts as a tamper-evident trust record
+- the blockchain-assisted layer helps preserve integrity of trust continuity data
+
+The practical message is:
+the blockchain path carries compact trust evidence or record references,
+rather than bulky raw data.
+
+Trust Sharing Across RSUs
+-------------------------
+Without continuity support, trust may remain only with the local RSU.
+
+With blockchain-assisted sharing:
+
+- one RSU can publish compact trust-related state
+- another RSU can later retrieve or benefit from that state
+- this supports trust portability during mobility and handover
+
+So trust sharing here means:
+trust continuity information becomes available beyond a single local observer.
+
+How It Connects to Handover
+---------------------------
+At handover time, the target RSU may need prior trust context.
+
+The blockchain-assisted path helps provide:
+
+- previously recorded trust state
+- continuity across RSU boundaries
+- less dependence on starting from zero trust context
+
+However, the final decision is still local and depends on:
+
+- freshness
+- thresholds
+- current logic
+- FAST / FULL / REJECT rules
+
+So the blockchain does not replace decision logic.
+It supports trust availability.
+
+Reviewer-Friendly Technical Wording
+-----------------------------------
+The blockchain-assisted layer is used to share compact trust continuity
+records across RSUs. These records should be understood as summarized
+trust-related state or tamper-evident references, rather than raw packet
+history or a full production-grade ledger design.
+
+Safe Paper Wording
+------------------
+The blockchain component is used to support trust continuity across RSUs by
+recording and retrieving compact trust-related state. In this project, the
+shared information is best interpreted as summarized trust evidence or
+record references, not full raw traffic storage or a production-scale
+on-chain data model.

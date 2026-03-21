@@ -1,0 +1,28 @@
+Release Bundle Contents
+=======================
+
+Archives
+--------
+- project_evidence_bundle.tar.gz
+- project_evidence_bundle.zip
+
+Included top-level evidence sections
+------------------------------------
+- baseline/
+- secure/
+- handover/
+- adaptive/
+- integrated/
+- formal/
+- docs/
+
+Important control files
+-----------------------
+- EVIDENCE_MANIFEST.csv
+- MASTER_FILE_LIST.txt
+- CHECKSUMS.txt
+
+Purpose
+-------
+This release bundle is the final packaged reproducibility/evidence set
+for the Secure Trust-Based V2X Communication with Blockchain Support project.

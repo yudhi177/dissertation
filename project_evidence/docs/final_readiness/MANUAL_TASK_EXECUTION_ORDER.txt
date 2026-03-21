@@ -1,0 +1,30 @@
+Manual Task Execution Order
+===========================
+
+Step 1
+------
+Fill:
+project_evidence/docs/related_work/PRIOR_WORK_COMPARISON_TEMPLATE.csv
+
+Step 2
+------
+Draw/export:
+- architecture diagram
+- authentication / handover flowchart
+- threat model diagram
+- blockchain continuity workflow
+- formal message flow figure
+
+Step 3
+------
+Capture screenshots listed in:
+project_evidence/docs/screenshots/SCREENSHOT_CAPTURE_LOG.csv
+
+Step 4
+------
+Open:
+project_evidence/docs/writing_prep/SECTION_INPUT_MAP.txt
+
+Step 5
+------
+Begin manuscript drafting.
