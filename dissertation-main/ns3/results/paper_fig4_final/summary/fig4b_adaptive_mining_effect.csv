@@ -1,0 +1,3 @@
+adaptive,avgBlockLatency_ms_mean,avgBlockLatency_ms_std,reportsCommitted_mean,reportsCommitted_std,blocks_mean,blocks_std,avgLedgerTrust_mean,avgLedgerTrust_std
+0,50.0,0.0,190.0,0.0,10.0,0.0,0.773333,0.0
+1,22.4118,0.0,196.0,0.0,17.0,0.0,0.773333,0.0

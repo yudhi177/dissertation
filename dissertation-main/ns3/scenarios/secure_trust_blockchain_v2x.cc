@@ -32,14 +32,6 @@ using namespace ns3;
 
 
 
-
-
-
-
-// AUTH_INIT_GUARD_V2_BEGIN
-static bool g_authKeysReady = false;
-// AUTH_INIT_GUARD_V2_END
-static void AuthInitKeys(uint32_t nVehicles);
 // PRIVACY_EVENT_LOGGER_BEGIN
 #include <fstream>
 static std::ofstream* g_eventsPtr = nullptr;
@@ -123,8 +115,6 @@ static uint32_t g_fullAuthDelayMs = 120;
 static const uint16_t g_dataPort   = 9000;
 static const uint16_t g_reportPort = 9100;
 
-
-static void RotatePseudonym(uint32_t v, const std::string& reason);
 
 // PRIVACY_MODULE_V1_BEGIN
 /* =========================================================
@@ -584,8 +574,8 @@ static uint32_t g_bcUpdateDelayMs = 18;         // simulated ledger update delay
 
 struct TrustCacheEntry
 {
-  double lastFetchS = -1e9;  // cache timestamp (seconds)
   double trust = 1.0;
+  double lastFetchS = -1e9;
   bool valid = false;
 };
 
@@ -634,8 +624,8 @@ static double GetTrustScoreCached(const std::string& key,
   auto it = g_trustCache.find(key);
   const double now = NowS();
   const double ttlS = double(g_cacheTtlMs) / 1000.0;
-  if (it != g_trustCache.end() && it->second.valid &&
-      ((now - it->second.lastFetchS) <= ttlS))
+
+  if (it != g_trustCache.end() && it->second.valid && (now - it->second.lastFetchS) <= ttlS)
   {
     g_cacheHits++;
     outCacheHit = true;
@@ -651,8 +641,8 @@ static double GetTrustScoreCached(const std::string& key,
 
   TrustCacheEntry e;
   e.trust = t;
-  e.valid = true;
   e.lastFetchS = now;
+  e.valid = true;
   g_trustCache[key] = e;
 
   return t;
@@ -663,7 +653,7 @@ static void MaybeCommitTrustUpdate(const std::string& key,
                                   double& outExtraDelayMs,
                                   bool& outDidUpdate)
 {
-
+  
 // BC_COMMIT_GATE_BEGIN
   if (!g_enableBlockchain)
   {
@@ -672,8 +662,9 @@ static void MaybeCommitTrustUpdate(const std::string& key,
     return;
   }
 // BC_COMMIT_GATE_END
-  outExtraDelayMs = 0.0;
+outExtraDelayMs = 0.0;
   outDidUpdate = false;
+
   const double now = NowS();
   const double intervalS = double(g_bcSyncIntervalMs) / 1000.0;
   const double last = (g_lastBcUpdateS.count(key) ? g_lastBcUpdateS[key] : -1e9);
@@ -683,8 +674,8 @@ static void MaybeCommitTrustUpdate(const std::string& key,
   {
     auto &e = g_trustCache[key];
     e.trust = newTrust;
-    e.valid = true;
     e.lastFetchS = now;
+    e.valid = true;
   }
 
   if ((now - last) < intervalS)
@@ -839,12 +830,8 @@ static void PrivacyInit()
       g_pseudoPool[v].push_back(MakePseudo(v, k));
   }
 
-  // NOTE:
-  // The actual pseudonym used on the wire is maintained by the
-  // numeric pseudonym module (InitPseudonyms / RotatePseudonym).
-  // We keep this string pool only for probe-key variation and
-  // do not schedule a second rotation timer here, otherwise
-  // privacy metrics get double-counted.
+  for (uint32_t v = 0; v < g_nVehicles; ++v)
+    Simulator::Schedule(Seconds(g_pseudoRotateSec), &PrivacyRotateTimer, v);
 }
 
 static void PrintPrivacyStats()
@@ -898,201 +885,97 @@ static void StartBcProbes()
   }
 }
 // BC_PROBE_V1_END
-
-
-
-
-// AUTH_BIND_V3_BEGIN
+// AUTH_BIND_V1_BEGIN
 /* =========================================================
-   AUTH Session Binding (v3): compile-safe binding + MITM + AuthReplay
-   - Reuses existing global events stream: g_evt (std::ofstream)
-   - No duplicate NowS(); no g_seed dependency
-   - Signature-style (toy Schnorr) bind: (sender|ephPub|nonce|ts)
-   - MITM: ephPub tamper -> AUTH_FAIL reason=BAD_SIG
-   - Replay: same tuple -> AUTH_FAIL reason=REPLAY_AUTH
+   Authenticated Session Binding (v1) + MITM test + AuthProbe
+   - Simulation-friendly binding: tag = H(senderId|ephPub|nonce|tsMs)
+   - MITM mode tampers ephPub at receiver => verification fails
+   - AuthProbe generates periodic handshake attempts so metrics become non-zero
 ========================================================= */
-
-static bool     g_enableAuthBind = true;
-static bool     g_enableMitmAttack = false;
+static bool g_enableAuthBind = true;
+static bool g_enableMitmAttack = false;
 
 static bool     g_enableAuthProbe = false;
 static uint32_t g_authProbeIntervalMs = 500;
 
-static bool     g_enableAuthReplayAttack = false;
-static uint32_t g_authReplayEveryN = 5;
-
 static uint64_t g_authOk = 0;
 static uint64_t g_authFail = 0;
 static uint64_t g_authFailMitm = 0;
-static uint64_t g_authFailReplay = 0;
 
-// ---- Tiny Schnorr params (toy group) ----
-static const uint64_t AUTH_P = 1223;
-static const uint64_t AUTH_Q = 611;
-static const uint64_t AUTH_G = 4;
-
-// stable 32-bit hash (FNV-1a)
-static uint32_t H32(const std::string& s)
+// SimpleSig: stable 32-bit hash (FNV-1a)
+static uint32_t SimpleSig(const std::string& s)
 {
   uint32_t h = 2166136261u;
-  for (unsigned char c : s) { h ^= (uint32_t)c; h *= 16777619u; }
+  for (unsigned char c : s)
+  {
+    h ^= (uint32_t)c;
+    h *= 16777619u;
+  }
   return h;
 }
-static uint64_t Hq(const std::string& s) { return (uint64_t)(H32(s) % (uint32_t)AUTH_Q); }
 
-static uint64_t ModPow(uint64_t a, uint64_t e, uint64_t m)
+static uint32_t MakeAuthTag(uint32_t senderId,
+                            const std::string& ephPub,
+                            uint64_t nonce,
+                            uint64_t tsMs)
 {
-  uint64_t r = 1 % m; a %= m;
-  while (e) { if (e & 1) r = (r * a) % m; a = (a * a) % m; e >>= 1; }
-  return r;
-}
-static uint64_t ModInv(uint64_t a, uint64_t m) { return ModPow(a, m - 2, m); }
-
-// keys per vehicle (deterministic, no g_seed dependency)
-static std::vector<uint64_t> g_authPrivX; // x in [1..q-1]
-static std::vector<uint64_t> g_authPubY;  // y = g^x mod p
-static void __attribute__((unused)) AuthInitKeys(uint32_t nVehicles)
-{
-  g_authPrivX.assign(nVehicles, 0);
-  g_authPubY.assign(nVehicles, 0);
-  for (uint32_t v = 0; v < nVehicles; ++v)
-  {
-    uint64_t x = 1 + (H32("AUTHKEY:" + std::to_string(v)) % (uint32_t)(AUTH_Q - 1));
-    g_authPrivX[v] = x;
-    g_authPubY[v]  = ModPow(AUTH_G, x, AUTH_P);
-  }
+  return SimpleSig(std::to_string(senderId) + "|" + ephPub + "|" +
+                   std::to_string(nonce) + "|" + std::to_string(tsMs));
 }
 
-struct AuthSig { uint64_t e=0; uint64_t s=0; };
-
-static inline std::string AuthMsg(uint32_t sender,
-                                  const std::string& ephPub,
-                                  uint64_t nonce,
-                                  uint64_t tsMs)
+static bool VerifyAuthTag(uint32_t senderId,
+                          std::string ephPub,
+                          uint64_t nonce,
+                          uint64_t tsMs,
+                          uint32_t recvTag,
+                          bool mitmTamper)
 {
-  return std::to_string(sender) + "|" + ephPub + "|" + std::to_string(nonce) + "|" + std::to_string(tsMs);
+  if (mitmTamper)
+    ephPub += "|MITM";
+  return recvTag == MakeAuthTag(senderId, ephPub, nonce, tsMs);
 }
 
-static AuthSig AuthSign(uint32_t sender, const std::string& msg, uint64_t k)
+static void AuthProbeOnce(uint32_t v)
 {
-  AuthSig sig;
-  uint64_t r = ModPow(AUTH_G, k % AUTH_Q, AUTH_P);
-  sig.e = Hq(msg + "|" + std::to_string(r));
-  sig.s = (k + (sig.e * g_authPrivX[sender]) % AUTH_Q) % AUTH_Q;
-  return sig;
-}
+  if (!g_enableAuthProbe) return;
 
-static bool AuthVerify(uint32_t sender, const std::string& msg, const AuthSig& sig)
-{
-  if (sender >= g_authPubY.size()) return false;
-  uint64_t gs = ModPow(AUTH_G, sig.s % AUTH_Q, AUTH_P);
-  uint64_t ye = ModPow(g_authPubY[sender], sig.e % AUTH_Q, AUTH_P);
-  uint64_t r  = (gs * ModInv(ye, AUTH_P)) % AUTH_P;
-  uint64_t e2 = Hq(msg + "|" + std::to_string(r));
-  return (e2 == (sig.e % AUTH_Q));
-}
+  const uint64_t tsMs = (uint64_t)Simulator::Now().GetMilliSeconds();
+  const uint64_t nonce = (uint64_t)(tsMs ^ (v * 2654435761u)); // deterministic-ish
+  const std::string ephPub = "E" + std::to_string(v) + "_" + std::to_string(tsMs);
 
-// Replay cache
-static std::unordered_set<std::string> g_authReplayCache;
-static inline std::string ReplayKey(uint32_t sender, uint64_t nonce, uint64_t tsMs)
-{
-  return std::to_string(sender) + "|" + std::to_string(nonce) + "|" + std::to_string(tsMs);
-}
+  const uint32_t tag = MakeAuthTag(v, ephPub, nonce, tsMs);
 
-// Use existing global g_evt (ofstream) safely
-static inline void AuthEvt(const std::string& s)
-{
-  if (g_evt.good())
-    g_evt << Simulator::Now().GetSeconds() << "," << s << "\n";
-}
+  bool ok = true;
+  if (g_enableAuthBind)
+    ok = VerifyAuthTag(v, ephPub, nonce, tsMs, tag, g_enableMitmAttack);
 
-static void DoAuthAttempt(uint32_t sender, uint32_t receiver, uint64_t nonce, uint64_t tsMs, uint64_t k)
-{
-  std::string ephPub = "E" + std::to_string(sender) + "_" + std::to_string(tsMs);
-  std::string msg    = AuthMsg(sender, ephPub, nonce, tsMs);
-
-  AuthEvt("AUTH_START sender=" + std::to_string(sender) + " rx=" + std::to_string(receiver));
-
-  // receiver side (MITM tamper)
-  std::string ephRx = ephPub;
-  if (g_enableMitmAttack) ephRx = ephPub + "_TAMPER";
-
-  // replay check
-  const std::string rk = ReplayKey(sender, nonce, tsMs);
-  if (g_authReplayCache.count(rk))
-  {
-    g_authFail++; g_authFailReplay++;
-    AuthEvt("AUTH_FAIL sender=" + std::to_string(sender) + " rx=" + std::to_string(receiver) + " reason=REPLAY_AUTH");
-    return;
-  }
-
-  AuthSig sig = AuthSign(sender, msg, k);
-
-  std::string msgRx = AuthMsg(sender, ephRx, nonce, tsMs);
-  const bool ok = AuthVerify(sender, msgRx, sig);
-
-  if (!ok)
+  if (ok) g_authOk++;
+  else
   {
     g_authFail++;
     if (g_enableMitmAttack) g_authFailMitm++;
-    AuthEvt("AUTH_FAIL sender=" + std::to_string(sender) + " rx=" + std::to_string(receiver) + " reason=BAD_SIG");
-    return;
   }
 
-  g_authReplayCache.insert(rk);
-  g_authOk++;
-  AuthEvt("AUTH_OK sender=" + std::to_string(sender) + " rx=" + std::to_string(receiver));
-}
-
-static void AuthProbeTick()
-{
-// AUTH_TICK_GUARD_V1_BEGIN
-  if (!g_enableAuthProbe) return;
-  if (g_nVehicles == 0) return;
-// AUTH_TICK_GUARD_V1_END
-
-if (!g_enableAuthProbe) return;
-  if (g_nVehicles < 2) return;
-
-  static uint64_t ctr = 0;
-  ctr++;
-
-  uint64_t tsMs  = (uint64_t)Simulator::Now().GetMilliSeconds();
-  uint64_t nonce = (uint64_t)H32("NONCE:" + std::to_string(ctr));
-  uint64_t k     = 1 + ((uint64_t)H32("K:" + std::to_string(ctr)) % (AUTH_Q - 1));
-
-  // replay mode: reuse tuple every N
-  static uint64_t lastNonce = 0, lastTs = 0;
-  if (g_enableAuthReplayAttack && (ctr % g_authReplayEveryN == 0))
-  {
-    nonce = lastNonce; tsMs = lastTs;
-  }
-  else
-  {
-    lastNonce = nonce; lastTs = tsMs;
-  }
-
-  DoAuthAttempt(0, 1, nonce, tsMs, k);
-  Simulator::Schedule(MilliSeconds(g_authProbeIntervalMs), &AuthProbeTick);
+  Simulator::Schedule(MilliSeconds(g_authProbeIntervalMs), &AuthProbeOnce, v);
 }
 
 static void StartAuthProbes()
 {
-  if (!g_authKeysReady) { AuthInitKeys(g_nVehicles); g_authKeysReady = true; }
   if (!g_enableAuthProbe) return;
-  Simulator::Schedule(MilliSeconds(1), &AuthProbeTick);
+  for (uint32_t v = 0; v < g_nVehicles; ++v)
+  {
+    Simulator::Schedule(MilliSeconds(100 + (v % 10)), &AuthProbeOnce, v);
+  }
 }
 
-static inline void PrintAuthStats()
+static void PrintAuthStats()
 {
   std::cout << "[AUTH] ok=" << g_authOk
             << " fail=" << g_authFail
             << " mitmFail=" << g_authFailMitm
-            << " replayFail=" << g_authFailReplay
             << std::endl;
 }
-// AUTH_BIND_V3_END
-
+// AUTH_BIND_V1_END
 
 static double GetTrustForHandover(uint32_t v, uint32_t* extraDelayMs, bool* cacheHit)
 {
@@ -1108,6 +991,14 @@ static double GetTrustForHandover(uint32_t v, uint32_t* extraDelayMs, bool* cach
 
   *extraDelayMs += (uint32_t)(dms + 0.5);
   *cacheHit = hit;
+
+  // staleness mismatch check (only meaningful when trust is stale)
+  g_staleChecks++;
+  if (TrustAgeMs(v) > g_trustMaxAgeMs && v < g_ledgerTrust.size())
+  {
+    // if returned trust differs from ledger trust by a small epsilon, count mismatch
+    if (std::fabs(t - g_ledgerTrust[v]) > 1e-6) g_staleMismatchCount++;
+  }
 
   return t;
 }
@@ -1265,13 +1156,6 @@ static void RotatePseudonym(uint32_t v, const std::string& reason)
   st.idx = (st.idx + 1) % st.pool.size();
   uint64_t newPseudo = st.pool[st.idx];
 
-  // Keep the string pseudonym pool in sync with the numeric on-wire pseudonym.
-  if (v < g_pseudoIdx.size() && v < g_pseudoPool.size() && !g_pseudoPool[v].empty())
-  {
-    g_pseudoIdx[v] = (g_pseudoIdx[v] + 1) % (uint32_t)g_pseudoPool[v].size();
-    g_lastRotateS[v] = Simulator::Now().GetSeconds();
-  }
-
   EvaluateLinkability(v, newPseudo, reason);
 
   g_activePseudo[v] = newPseudo;
@@ -1386,21 +1270,15 @@ static void RevocationSyncTick(uint32_t nodeId)
   Simulator::Schedule(MilliSeconds(g_revokeSyncIntervalMs), &RevocationSyncTick, nodeId);
 }
 
-static void StartRevocationSupport()
+static void RevocationMonitorTick()
 {
   if (!g_enableRevocation) return;
-
-  g_revokedVeh.assign(g_nVehicles, 0);
-  g_revokeKnown.assign(NodeList::GetNNodes(), 0);
-  g_revokeKnownTime.assign(NodeList::GetNNodes(), -1e9);
-  g_revokeIssueTime = -1e9;
-
-  Simulator::Schedule(Seconds(0.6), &RevocationSyncTick);
-  for (uint32_t i = 0; i < NodeList::GetNNodes(); i++)
-    Simulator::Schedule(MilliSeconds(g_revokeSyncIntervalMs), &RevocationSyncTick, i);
-
-  if (g_forceRevokeVehicle0)
-    Simulator::Schedule(Seconds(g_forceRevokeTime), &IssueRevocation, 0, std::string("FORCED"));
+  for (uint32_t v = 0; v < g_nVehicles; v++)
+  {
+    if (v < g_ledgerTrust.size() && !g_revokedVeh[v] && g_ledgerTrust[v] < g_revokeTrustThresh)
+      IssueRevocation(v, "TRUST_BELOW_THRESH");
+  }
+  Simulator::Schedule(Seconds(0.5), &RevocationMonitorTick);
 }
 // REVOCATION_MODULE_V1_END
 
@@ -1508,6 +1386,18 @@ static void CommitNow()
   }
 
   Simulator::Schedule(MilliSeconds(nextInterval), &StartBlockchain);
+
+  // Revocation init + scheduling
+  if (g_enableRevocation) {
+    g_revokedVeh.assign(g_nVehicles, 0);
+    g_revokeKnown.assign(NodeList::GetNNodes(), 0);
+    g_revokeKnownTime.assign(NodeList::GetNNodes(), -1e9);
+    Simulator::Schedule(Seconds(0.6), &RevocationMonitorTick);
+    for (uint32_t i = 0; i < NodeList::GetNNodes(); i++)
+      Simulator::Schedule(MilliSeconds(g_revokeSyncIntervalMs), &RevocationSyncTick, i);
+    if (g_forceRevokeVehicle0)
+      Simulator::Schedule(Seconds(g_forceRevokeTime), &IssueRevocation, 0, std::string("FORCED"));
+  }
 }
 
 static void StartBlockchain()
@@ -1756,7 +1646,8 @@ static void FinishHandover(uint32_t v, int32_t target, bool fast, uint32_t authD
   else      { if (mal) g_malFull++; else g_honFull++; }
 
   LogEvent("HO_DONE v=" + std::to_string(v) +
-           " to=" + std::to_string(target) +
+
+" to=" + std::to_string(target) +
            " mode=" + std::string(fast ? "FAST" : "FULL") +
            " authMs=" + std::to_string(authDelayMs) +
            " hoDelay=" + std::to_string(delay));
@@ -1765,7 +1656,7 @@ static void FinishHandover(uint32_t v, int32_t target, bool fast, uint32_t authD
   // Rotate pseudonym on handover completion (privacy boost at RSU boundary)
   if (g_enablePrivacy && g_rotateOnHandover)
   {
-    RotatePseudonym(v, "HO_DONE");
+    PrivacyRotate(v, "HO_DONE");
   }
 // PRIVACY_HO_ROTATE_HOOK_END
 }
@@ -1791,19 +1682,16 @@ static void CheckHandover(Ptr<Node> veh)
 
   if (target != -1 && target != current && !g_vs[id].authInProgress)
   {
-    uint32_t extraTrustDelayMs = 0;
-    bool cacheHit = true;
-    double trust = GetTrustForHandover(id, &extraTrustDelayMs, &cacheHit);
+    uint32_t extraTrustDelayMs = 0; bool cacheHit = true;
+  double trust = GetTrustForHandover(id, &extraTrustDelayMs, &cacheHit);
 
-    // Freshness + confidence gating for FAST handover
-    if (!cacheHit) { TouchTrustSync(id); }  // only on miss we refresh "last sync"
-    const uint32_t ageMs = TrustAgeMs(id);
-    const double conf = (id < g_trustConf.size()) ? g_trustConf[id] : 0.0;
-    const bool freshOk = (ageMs <= g_trustMaxAgeMs);
-    const bool confOk = (conf >= g_confMinForFast);
-    RecordStaleCheck(id, trust, cacheHit, ageMs);
+  // Freshness gating (Δmax)
+  if (!cacheHit) { TouchTrustSync(id); }  // only on miss we refresh "last sync"
+  const uint32_t ageMs = TrustAgeMs(id);
+  const bool freshOk = (ageMs <= g_trustMaxAgeMs);
 
-    if (trust < g_trustMinThresh)
+  RecordStaleCheck(id, trust, cacheHit, ageMs);
+if (trust < g_trustMinThresh)
     {
       g_rejectCount++;
       bool mal = g_isMalicious[id];
@@ -1812,13 +1700,11 @@ static void CheckHandover(Ptr<Node> veh)
       LogEvent("HO_REJECT v=" + std::to_string(id) +
                " from=" + std::to_string(current) +
                " to=" + std::to_string(target) +
-               " trust=" + std::to_string(trust) +
-               " ageMs=" + std::to_string(ageMs) +
-               " conf=" + std::to_string(conf));
+               " trust=" + std::to_string(trust));
     }
     else
     {
-      bool fast = (trust >= g_trustFastThresh && freshOk && confOk);
+      bool fast = ((trust >= g_trustFastThresh && TrustAgeMs(id) <= g_trustMaxAgeMs));
       uint32_t authDelay = fast ? g_fastAuthDelayMs : g_fullAuthDelayMs;
 
       g_handoverCount++;
@@ -1829,8 +1715,6 @@ static void CheckHandover(Ptr<Node> veh)
                " from=" + std::to_string(current) +
                " to=" + std::to_string(target) +
                " trust=" + std::to_string(trust) +
-               " ageMs=" + std::to_string(ageMs) +
-               " conf=" + std::to_string(conf) +
                " mode=" + std::string(fast ? "FAST" : "FULL"));
 
       Simulator::Schedule(MilliSeconds(authDelay),
@@ -1901,14 +1785,7 @@ static void WriteCsv()
 ======================= */
 
 
-// SEED_FLAG_V1_BEGIN
-static uint32_t g_seed = 1;
-// SEED_FLAG_V1_END
-
-
-
-
-// BASELINE_ASSERTS_V2_BEGIN
+// BASELINE_ASSERTS_V1_BEGIN
 static std::string g_baselineName = "UNSET";
 
 static void AssertBaselineConfig()
@@ -1916,42 +1793,47 @@ static void AssertBaselineConfig()
   if (g_baselineName == "PKI_ONLY")
   {
     NS_ABORT_MSG_IF(g_enableTrustEngineFinal, "PKI_ONLY violation: trust must be OFF");
-    NS_ABORT_MSG_IF(g_enableBlockchain, "PKI_ONLY violation: blockchain must be OFF");
-    NS_ABORT_MSG_IF(g_enableRevocation, "PKI_ONLY violation: revocation must be OFF");
-    NS_ABORT_MSG_IF(g_enablePrivacy, "PKI_ONLY violation: privacy must be OFF");
-    NS_ABORT_MSG_IF(g_enableBcProbe, "PKI_ONLY violation: bcProbe must be OFF");
-    NS_ABORT_MSG_IF(g_enableBCLocalCache, "PKI_ONLY violation: bcCache must be OFF");
+    NS_ABORT_MSG_IF(g_enableBlockchain,      "PKI_ONLY violation: blockchain must be OFF");
+    NS_ABORT_MSG_IF(g_enableRevocation,      "PKI_ONLY violation: revocation must be OFF");
+    NS_ABORT_MSG_IF(g_enablePrivacy,         "PKI_ONLY violation: privacy must be OFF");
+    NS_ABORT_MSG_IF(g_enableBcProbe,         "PKI_ONLY violation: bcProbe must be OFF");
+    NS_ABORT_MSG_IF(g_enableBCLocalCache,    "PKI_ONLY violation: bcCache must be OFF");
   }
   else if (g_baselineName == "TRUST_ONLY")
   {
     NS_ABORT_MSG_IF(!g_enableTrustEngineFinal, "TRUST_ONLY violation: trust must be ON");
-    NS_ABORT_MSG_IF(g_enableBlockchain, "TRUST_ONLY violation: blockchain must be OFF");
-    NS_ABORT_MSG_IF(g_enableRevocation, "TRUST_ONLY violation: revocation must be OFF");
-    NS_ABORT_MSG_IF(g_enablePrivacy, "TRUST_ONLY violation: privacy must be OFF");
-    NS_ABORT_MSG_IF(g_enableBcProbe, "TRUST_ONLY violation: bcProbe must be OFF");
-    NS_ABORT_MSG_IF(g_enableBCLocalCache, "TRUST_ONLY violation: bcCache must be OFF");
+    NS_ABORT_MSG_IF(g_enableBlockchain,        "TRUST_ONLY violation: blockchain must be OFF");
+    NS_ABORT_MSG_IF(g_enableRevocation,        "TRUST_ONLY violation: revocation must be OFF");
+    NS_ABORT_MSG_IF(g_enablePrivacy,           "TRUST_ONLY violation: privacy must be OFF");
+    NS_ABORT_MSG_IF(g_enableBcProbe,           "TRUST_ONLY violation: bcProbe must be OFF");
+    NS_ABORT_MSG_IF(g_enableBCLocalCache,      "TRUST_ONLY violation: bcCache must be OFF");
   }
   else if (g_baselineName == "BC_TRUST")
   {
     NS_ABORT_MSG_IF(!g_enableTrustEngineFinal, "BC_TRUST violation: trust must be ON");
-    NS_ABORT_MSG_IF(!g_enableBlockchain, "BC_TRUST violation: blockchain must be ON");
+    NS_ABORT_MSG_IF(!g_enableBlockchain,       "BC_TRUST violation: blockchain must be ON");
   }
   else if (g_baselineName == "BC_ALWAYS_QUERY")
   {
     NS_ABORT_MSG_IF(!g_enableTrustEngineFinal, "BC_ALWAYS_QUERY violation: trust must be ON");
-    NS_ABORT_MSG_IF(!g_enableBlockchain, "BC_ALWAYS_QUERY violation: blockchain must be ON");
-    NS_ABORT_MSG_IF(g_enableBCLocalCache, "BC_ALWAYS_QUERY violation: cache must be OFF");
-    NS_ABORT_MSG_IF(!g_enableBcProbe, "BC_ALWAYS_QUERY violation: probe should be ON");
+    NS_ABORT_MSG_IF(!g_enableBlockchain,       "BC_ALWAYS_QUERY violation: blockchain must be ON");
+    NS_ABORT_MSG_IF(g_enableBCLocalCache,      "BC_ALWAYS_QUERY violation: cache must be OFF");
+    NS_ABORT_MSG_IF(!g_enableBcProbe,          "BC_ALWAYS_QUERY violation: probe should be ON");
   }
   else if (g_baselineName == "FULL")
   {
     NS_ABORT_MSG_IF(!g_enableTrustEngineFinal, "FULL violation: trust must be ON");
-    NS_ABORT_MSG_IF(!g_enableBlockchain, "FULL violation: blockchain must be ON");
-    NS_ABORT_MSG_IF(!g_enableRevocation, "FULL violation: revocation must be ON");
-    NS_ABORT_MSG_IF(!g_enablePrivacy, "FULL violation: privacy must be ON");
+    NS_ABORT_MSG_IF(!g_enableBlockchain,       "FULL violation: blockchain must be ON");
+    NS_ABORT_MSG_IF(!g_enableRevocation,       "FULL violation: revocation must be ON");
+    NS_ABORT_MSG_IF(!g_enablePrivacy,          "FULL violation: privacy must be ON");
   }
 }
-// BASELINE_ASSERTS_V2_END
+// BASELINE_ASSERTS_V1_END
+
+
+// SEED_FLAG_V1_BEGIN
+static uint32_t g_seed = 1;
+// SEED_FLAG_V1_END
 
 
 int main(int argc, char* argv[])
@@ -2048,25 +1930,18 @@ cmd.AddValue("cacheTtlMs", "Trust cache TTL (ms)", g_cacheTtlMs);
   cmd.AddValue("mixRadiusM", "Mix-zone radius in meters", g_mixRadiusM);
 
   cmd.AddValue("enableBcProbe", "Enable periodic BC trust queries (probe workload)", g_enableBcProbe);
+
+  cmd.AddValue("enableAuthBind", "Bind ECDH ephemeral key to auth tag", g_enableAuthBind);
+  cmd.AddValue("enableMitmAttack", "MITM test: tamper pubkey at receiver (should fail)", g_enableMitmAttack);
+
+  cmd.AddValue("enableAuthProbe", "Generate periodic auth handshakes (to measure AUTH stats)", g_enableAuthProbe);
+  cmd.AddValue("authProbeIntervalMs", "Auth probe interval per vehicle (ms)", g_authProbeIntervalMs);
   cmd.AddValue("bcProbeIntervalMs", "BC probe interval per vehicle (ms)", g_bcProbeIntervalMs);
   cmd.AddValue("bcProbeUsePseudonym", "Probe uses active pseudonym key when privacy enabled", g_bcProbeUsePseudonym);
 cmd.AddValue("forceRevokeVehicle0", "Force revoke vehicle0 0/1", g_forceRevokeVehicle0);
   cmd.AddValue("forceRevokeTime", "Force revoke time (s)", g_forceRevokeTime);
-  cmd.AddValue("enableAuthBind", "Bind ephemeral key to auth signature", g_enableAuthBind);
-  cmd.AddValue("enableMitmAttack", "MITM test: tamper ephPub at receiver (must fail)", g_enableMitmAttack);
-  cmd.AddValue("enableAuthProbe", "Generate periodic auth handshakes (to measure AUTH)", g_enableAuthProbe);
-  cmd.AddValue("authProbeIntervalMs", "Auth probe interval (ms)", g_authProbeIntervalMs);
-  cmd.AddValue("enableAuthReplayAttack", "Replay auth tuple periodically (must fail)", g_enableAuthReplayAttack);
-  cmd.AddValue("authReplayEveryN", "Replay every N probes", g_authReplayEveryN);
+
 cmd.Parse(argc, argv);
-
-  // AUTH_INIT_GUARD_V2: initialize auth keys once (needed for auth probe / replay / mitm tests)
-  if (g_enableAuthProbe && !g_authKeysReady)
-  {
-    AuthInitKeys(g_nVehicles);
-    g_authKeysReady = true;
-  }
-
   AssertBaselineConfig();
   SeedManager::SetSeed(g_seed);
   SeedManager::SetRun(g_seed);
@@ -2247,8 +2122,6 @@ g_keys.assign(g_nVehicles, 0);
     g_vehicleReportSock[v] = s;
   }
 
-  StartRevocationSupport();
-
   // Data send sockets (per vehicle)
   g_dataSendSock.resize(g_nVehicles);
   for (uint32_t v = 0; v < g_nVehicles; v++)
@@ -2285,10 +2158,9 @@ g_keys.assign(g_nVehicles, 0);
 
   Simulator::Stop(Seconds(g_simTime));
   Simulator::Run();
-  PrintBcCacheStats();
-  PrintPrivacyStats();
-  PrintStaleStats();
-  PrintAuthStats();
+    PrintBcCacheStats();
+  PrintPrivacyStats();    PrintAuthStats();
+    PrintStaleStats();
   Simulator::Destroy();
 
   if (g_evt.is_open()) g_evt.close();

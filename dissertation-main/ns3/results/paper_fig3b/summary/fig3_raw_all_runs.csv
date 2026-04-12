@@ -1,0 +1,11 @@
+scenario,file,handoverCount,avgHandoverDelay_s,avgHandoverDelay_ms,fastAuthCount,fullAuthCount,rejectCount,meanEventTrust
+FAST_Biased,fast_case_seed1,2.0,0.005,5.0,2,0,0,0.861
+FAST_Biased,fast_case_seed2,2.0,0.005,5.0,2,0,0,0.861
+FAST_Biased,fast_case_seed3,2.0,0.005,5.0,2,0,0,0.861
+FAST_Biased,fast_case_seed4,2.0,0.005,5.0,2,0,0,0.861
+FAST_Biased,fast_case_seed5,2.0,0.005,5.0,2,0,0,0.861
+FULL_Biased,full_case_seed1,2.0,0.03,30.0,0,2,0,0.161
+FULL_Biased,full_case_seed2,2.0,0.03,30.0,0,2,0,0.161
+FULL_Biased,full_case_seed3,2.0,0.03,30.0,0,2,0,0.161
+FULL_Biased,full_case_seed4,2.0,0.03,30.0,0,2,0,0.161
+FULL_Biased,full_case_seed5,2.0,0.03,30.0,0,2,0,0.161

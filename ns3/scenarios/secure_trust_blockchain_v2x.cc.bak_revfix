@@ -1395,7 +1395,7 @@ static void StartRevocationSupport()
   g_revokeKnownTime.assign(NodeList::GetNNodes(), -1e9);
   g_revokeIssueTime = -1e9;
 
-  Simulator::Schedule(Seconds(0.6), &RevocationSyncTick);
+  Simulator::Schedule(Seconds(0.6), &RevocationMonitorTick);
   for (uint32_t i = 0; i < NodeList::GetNNodes(); i++)
     Simulator::Schedule(MilliSeconds(g_revokeSyncIntervalMs), &RevocationSyncTick, i);
 

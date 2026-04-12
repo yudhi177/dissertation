@@ -1,0 +1,5 @@
+Model,PDR_norm,Delay_ms,Throughput_kbps,LedgerTrust,BlockLatency_ms
+Baseline,,0.123299,0.25664,,
+Blockchain,1.0,0.662,196.156,,
+Full,0.719434,0.9560374,144.83520000000001,0.8000668000000001,50.0
+Secure,0.9610528,0.6580889999999,180.0436,,
